@@ -1,0 +1,16 @@
+services:
+  plk-kpi:
+    build: .
+    container_name: plk-kpi
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: "เปลี่ยนรหัสนี้ก่อนใช้งาน"   # ใช้ตอนเริ่มระบบครั้งแรกเท่านั้น
+      PUBLIC_READ: "1"        # 1 = ดูแดชบอร์ดได้โดยไม่ต้องล็อกอิน
+      ALLOW_REGISTER: "1"     # 1 = เจ้าหน้าที่สมัครบัญชีเองได้ (ผู้ดูแลยังต้องอนุมัติสิทธิ์)
+      COOKIE_SECURE: "0"      # ตั้งเป็น 1 เมื่อเปิดใช้ผ่าน HTTPS
+      TRUST_PROXY: "0"        # ตั้งเป็น 1 เมื่ออยู่หลัง nginx/Apache
+    volumes:
+      - ./data:/data

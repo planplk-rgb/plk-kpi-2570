@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PLK KPI 2570</title>
+<meta name="description" content="ระบบติดตามตัวชี้วัดกระทรวงสาธารณสุข สำนักงานสาธารณสุขจังหวัดพิษณุโลก">
+<script src="config.js"></script>
+<script src="rules.js"></script>
+<script src="shim.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@500;600;700&family=Sarabun:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a monitoring room — sticky top bar with role tabs; dashboard reads summary → Excellence → districts → matrix → list */
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --surface-2:#EAF0EC; --line:#D5DFD9; --fg:#17231D; --muted:#5B6B62; --accent:#0E6B4E; --accent-ink:#FFFFFF; --accent-soft:#DCEFE6;
+  --pass:#1E8449; --pass-bg:#C6EFCE; --watch:#1E8449; --watch-bg:#E3F4DF; --near:#9A6A00; --near-bg:#FFEB9C; --fail:#B42318; --fail-bg:#FFC7CE; --pend:#6B7570; --pend-bg:#E4E8E6; --na-bg:transparent;
+  --ex-pp:#D6336C; --ex-se:#12968A; --ex-pe:#7048C2; --ex-ge:#2E6FB7; --ex-he:#E07B1F;
+  --shadow:0 1px 2px rgba(20,40,30,.06),0 4px 14px rgba(20,40,30,.05);
+  --f-display:"IBM Plex Sans Thai","Sarabun",system-ui,sans-serif; --f-body:"Sarabun","Leelawadee UI","Tahoma",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1613; --surface:#16201B; --surface-2:#1D2A24; --line:#2C3B34; --fg:#E6EEE9; --muted:#9AABA2; --accent:#4CC79A; --accent-ink:#06241A; --accent-soft:#1B3A2E;
+  --pass:#6BD49A; --pass-bg:#1E4D33; --watch:#9BE0B4; --watch-bg:#21402F; --near:#F2C94C; --near-bg:#4A3B10; --fail:#FF8A80; --fail-bg:#5A2020; --pend:#A3ADA8; --pend-bg:#2A3530;
+  --ex-pp:#F06595; --ex-se:#38C9B9; --ex-pe:#A48AF0; --ex-ge:#6AA7EC; --ex-he:#F4A259; --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1613; --surface:#16201B; --surface-2:#1D2A24; --line:#2C3B34; --fg:#E6EEE9; --muted:#9AABA2; --accent:#4CC79A; --accent-ink:#06241A; --accent-soft:#1B3A2E;
+  --pass:#6BD49A; --pass-bg:#1E4D33; --watch:#9BE0B4; --watch-bg:#21402F; --near:#F2C94C; --near-bg:#4A3B10; --fail:#FF8A80; --fail-bg:#5A2020; --pend:#A3ADA8; --pend-bg:#2A3530;
+  --ex-pp:#F06595; --ex-se:#38C9B9; --ex-pe:#A48AF0; --ex-ge:#6AA7EC; --ex-he:#F4A259; --shadow:none; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--bg);margin:0}
+.demo-role{display:flex;align-items:center;gap:6px;font-size:13px}
+.who{flex-wrap:wrap;max-width:100%;min-width:0}.demo-role select{max-width:170px}
+@media (max-width:640px){.who{width:100%}.who .pn{max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+.demo-bar{background:var(--near-bg);color:var(--fg);font-size:13.5px;padding:6px 16px;text-align:center}
+body{color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.3}
+button,input,select,textarea{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top .wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display);font-size:18px;color:var(--accent)}
+.brand small{display:block;color:var(--muted);font-size:12.5px;line-height:1.2}
+.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tab{border:0;background:transparent;padding:8px 14px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:600}
+.tab[aria-current="page"]{background:var(--accent);color:var(--accent-ink)}
+.tab:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,.row-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.who{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted)}
+.who img{width:26px;height:26px;border-radius:50%}
+.role{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+main.wrap{padding-block:20px 48px;display:flex;flex-direction:column;gap:20px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.bar label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
+select,input[type=text],input[type=number],input[type=search],input[type=url],textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-width:0}
+textarea{width:100%;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--surface);padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--fail);border-color:var(--fail)}
+.btn.small{padding:4px 10px;font-size:13.5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.toggle{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;flex-direction:row!important;color:var(--fg)!important}
+.banner{border:1px dashed var(--near);background:var(--near-bg);color:var(--fg);padding:10px 14px;border-radius:10px;font-size:14.5px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel h2{font-size:18px;margin-bottom:12px}
+.panel h2 small{font-family:var(--f-body);font-weight:400;color:var(--muted);font-size:13.5px;margin-left:6px}
+.tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.tile .k{font-size:13.5px;color:var(--muted)}
+.tile .v{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.1;margin-top:4px}
+.tile .s{font-size:12.5px;color:var(--muted)}
+.tile.pass .v{color:var(--pass)} .tile.near .v{color:var(--near)} .tile.fail .v{color:var(--fail)} .tile.pend .v{color:var(--pend)}
+.tile.rate{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tile.rate .k,.tile.rate .s{color:inherit;opacity:.85}
+.exgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.ex{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:12px;padding:12px 14px;min-width:0;cursor:pointer;text-align:left}
+.ex[aria-pressed="true"]{outline:2px solid var(--c)}
+.ex .n{font-family:var(--f-display);font-weight:600;font-size:14.5px;color:var(--c)}
+.ex .p{font-family:var(--f-display);font-size:26px;font-weight:700}
+.ex .p small{font-size:13px;color:var(--muted);font-weight:500;font-family:var(--f-body)}
+.stack{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--pend-bg);margin:6px 0}
+.stack i{display:block;height:100%}
+.stack .pass{background:var(--pass)} .stack .watch{background:var(--watch);opacity:.6} .stack .near{background:var(--near)} .stack .fail{background:var(--fail)}
+.counts{display:flex;gap:10px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.counts b{color:var(--fg)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:20px}
+.dist{display:flex;flex-direction:column;gap:6px}
+.drow{display:grid;grid-template-columns:110px minmax(0,1fr) 92px;gap:10px;align-items:center;border:0;background:transparent;padding:4px 6px;border-radius:8px;cursor:pointer;text-align:left}
+.drow:hover,.drow[aria-pressed="true"]{background:var(--surface-2)}
+.drow .nm{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.drow .pc{font-size:13.5px;text-align:right;color:var(--muted)}
+.drow .pc b{color:var(--fg);font-size:15px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%}
+.mx th,.mx td{border-bottom:1px solid var(--line);padding:0;font-size:13px}
+.mx th{font-weight:600;color:var(--muted);text-align:center;padding:6px 4px;white-space:nowrap;position:sticky;top:0;background:var(--surface)}
+.mx th.name,.mx td.name{text-align:left;position:sticky;left:0;background:var(--surface);z-index:1;min-width:230px;max-width:300px;padding:5px 8px}
+.mx td.name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx td.c{width:62px;min-width:62px;text-align:center;padding:2px}
+.cell{display:block;border-radius:5px;padding:3px 1px;font-size:12px;font-variant-numeric:tabular-nums;cursor:pointer;border:1.5px solid transparent;width:100%}
+.s-pass{background:var(--pass-bg);color:var(--pass)} .s-watch{background:var(--watch-bg);color:var(--watch);border-color:var(--pass)!important}
+.s-near{background:var(--near-bg);color:var(--near)} .s-fail{background:var(--fail-bg);color:var(--fail)} .s-pending{background:var(--pend-bg);color:var(--pend)} .s-na{background:transparent;color:var(--line)}
+.chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 9px;border:1.5px solid transparent;font-size:12.5px;font-weight:600;white-space:nowrap}
+.legend{display:flex;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.fchip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13.5px;cursor:pointer}
+.fchip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.list td,.list th{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top;text-align:left;font-size:14.5px}
+.list th{font-size:13px;color:var(--muted);font-weight:600;white-space:nowrap}
+.list .grp td{background:var(--surface-2);font-family:var(--f-display);font-weight:600;font-size:14px;color:var(--c,var(--fg))}
+.list .plan td{font-size:13px;color:var(--muted);padding-top:12px;border-bottom:0}
+.row-btn{border:0;background:transparent;text-align:left;cursor:pointer;padding:0;color:inherit}
+.row-btn:hover .t{text-decoration:underline}
+.code{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:600;margin-right:6px}
+.sub td:first-child{padding-left:30px}
+.meta{font-size:12.5px;color:var(--muted)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.drawer-bg{position:fixed;inset:0;background:rgba(10,20,15,.35);z-index:40}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--surface);z-index:41;overflow-y:auto;border-left:1px solid var(--line);padding:calc(18px + env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) 18px;display:flex;flex-direction:column;gap:14px}
+.drawer h2{font-size:19px}
+.dl{display:grid;grid-template-columns:140px minmax(0,1fr);gap:6px 12px;font-size:14.5px}
+.dl dt{color:var(--muted)} .dl dd{margin:0}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.form .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.form .f.full{grid-column:1/-1}
+.form .f>span{font-size:13px;color:var(--muted);font-weight:600}
+.form .help{font-size:12.5px;color:var(--muted)}
+fieldset{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0;min-width:0}
+legend{font-size:13px;color:var(--muted);font-weight:600;padding:0 4px}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px}
+.people{display:flex;flex-wrap:wrap;gap:6px}
+.person{display:inline-flex;align-items:center;gap:6px;background:var(--surface-2);border-radius:999px;padding:2px 4px 2px 2px;font-size:13.5px}
+.person img{width:22px;height:22px;border-radius:50%}
+.person button{border:0;background:transparent;cursor:pointer;color:var(--muted);padding:0 6px}
+.hits{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;margin-top:4px;overflow:hidden}
+.hits button{border:0;background:var(--surface);text-align:left;padding:6px 10px;cursor:pointer;display:flex;gap:8px;align-items:center}
+.hits button:hover{background:var(--surface-2)}
+.hits img{width:22px;height:22px;border-radius:50%}
+.entry{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;align-items:start}
+.mine{display:flex;flex-direction:column;gap:2px;max-height:70vh;overflow-y:auto}
+.mine button{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:8px;cursor:pointer;display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.mine button[aria-current="true"]{background:var(--accent-soft)}
+.mine button:hover{background:var(--surface-2)}
+.mine .t{font-size:14px}
+.etable th,.etable td{border-bottom:1px solid var(--line);padding:6px;font-size:14px;text-align:left;vertical-align:middle}
+.etable th{font-size:12.5px;color:var(--muted);font-weight:600}
+.etable input[type=number]{width:100%;min-width:76px;text-align:right}
+.etable input[type=text]{width:100%;min-width:120px}
+.save-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:8px;z-index:60;font-size:14px}
+.subtabs{display:flex;gap:6px;border-bottom:1px solid var(--line)}
+.subtabs button{border:0;background:transparent;padding:8px 12px;cursor:pointer;color:var(--muted);font-weight:600;border-bottom:2px solid transparent}
+.subtabs button[aria-current="true"]{color:var(--accent);border-color:var(--accent)}
+.note{font-size:13.5px;color:var(--muted)}
+.gap{font-size:12.5px;line-height:1.45;margin-top:4px;font-variant-numeric:tabular-nums}
+.gap.bad{color:var(--fail)} .gap.ok{color:var(--muted)} .gap b{font-weight:600}
+.exp{position:relative}
+.exp summary{list-style:none;cursor:pointer}.exp summary::-webkit-details-marker{display:none}
+.exp summary::after{content:" ▾";font-size:11px}
+.exp-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:50;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.14);display:flex;flex-direction:column;min-width:190px;padding:4px}
+.exp-menu button{border:0;background:transparent;text-align:left;padding:8px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.exp-menu button:hover,.exp-menu button:focus-visible{background:var(--surface-2)}
+.exp-head{font-size:13px;color:var(--muted);padding:0 0 10px}
+.exporting .scroll{overflow:visible!important;max-height:none!important}
+.asof{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline;font-size:14.5px;padding:8px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.tchip.src{border-color:var(--accent);color:var(--accent)}
+.tchip{display:inline-block;font-size:11.5px;padding:0 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted);line-height:1.6;white-space:nowrap}
+.exdot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);margin-right:6px;vertical-align:middle}
+@media (max-width:1100px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.exgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.two{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.entry{grid-template-columns:minmax(0,1fr)}.mine{max-height:none}.form{grid-template-columns:minmax(0,1fr)}.exgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.dl{grid-template-columns:minmax(0,1fr)}.dl dt{margin-top:6px}}
+@media (max-width:480px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tabs{margin-left:0;width:100%}.drow{grid-template-columns:90px minmax(0,1fr) 80px}}
+@media (prefers-reduced-motion:no-preference){.stack i{transition:width .4s ease}}
+</style>
+
+</head>
+<body>
+<div class="demo-bar" id="demoBar" hidden>โหมดทดลอง: ข้อมูลที่บันทึกเก็บอยู่ในเบราว์เซอร์นี้เท่านั้น ใช้ช่อง “บทบาท” มุมขวาบนเพื่อสลับดูแต่ละส่วน</div>
+<script>if(window.PLK_CONFIG&&PLK_CONFIG.mode!=="server")document.getElementById("demoBar").hidden=false</script>
+<header class="top"><div class="wrap">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"/><path d="M8 22.5h4l2.5-7 4 11 3-8.5 1.5 4.5H26" fill="none" stroke="var(--accent-ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div><b>PLK KPI <span id="yearLbl" class="num">2570</span></b><small>ตัวชี้วัดกระทรวงสาธารณสุข · สสจ.พิษณุโลก</small></div>
+  </div>
+  <nav class="tabs" aria-label="ส่วนของระบบ">
+    <button class="tab" data-view="dashboard" aria-current="page">แดชบอร์ด</button>
+    <button class="tab" data-view="entry" hidden>บันทึกผล</button>
+    <button class="tab" data-view="admin" hidden>ผู้ดูแลระบบ</button>
+  </nav>
+  <div class="who" id="who"></div>
+</div></header>
+
+<main class="wrap" id="app"><div class="empty">กำลังโหลดข้อมูลตัวชี้วัด…</div></main>
+<div id="drawerHost"></div>
+
+<script>
+/* ================= CONSTANTS ================= */
+const DISTRICTS=[["d01","เมืองพิษณุโลก"],["d02","นครไทย"],["d03","ชาติตระการ"],["d04","บางระกำ"],["d05","บางกระทุ่ม"],["d06","พรหมพิราม"],["d07","วัดโบสถ์"],["d08","วังทอง"],["d09","เนินมะปราง"]].map(([id,name])=>({id,name}));
+const DIST_IDS=DISTRICTS.map(d=>d.id);
+const AREAS=[{id:"P",name:"ภาพรวมจังหวัด"},...DISTRICTS];
+const EXC=[
+  {id:"PP",name:"PP&P Excellence",c:"var(--ex-pp)"},
+  {id:"SE",name:"Service Excellence",c:"var(--ex-se)"},
+  {id:"PE",name:"People Excellence",c:"var(--ex-pe)"},
+  {id:"GE",name:"Governance Excellence",c:"var(--ex-ge)"},
+  {id:"HE",name:"Health-Related Economy Excellence",c:"var(--ex-he)"}];
+const FORMULAS={
+  percent:{t:"ร้อยละ",f:()=>"A ÷ B × 100"},
+  rate:{t:"อัตรา (ต่อประชากร/ต่อการเกิด)",f:k=>`A ÷ B × ${fmtInt(k.mult||100000)}`},
+  ratio:{t:"สัดส่วน",f:()=>"A ÷ B"},
+  count:{t:"จำนวน",f:()=>"A"},
+  change_prev:{t:"เพิ่มขึ้น/ลดลงจากปีก่อน",f:()=>"(A − ปีก่อน) ÷ ปีก่อน × 100"},
+  change_avg:{t:"เพิ่มขึ้น/ลดลงจากค่าเฉลี่ยย้อนหลัง",f:k=>`(A − ค่าเฉลี่ย ${k.years||3} ปี) ÷ ค่าเฉลี่ย × 100`},
+  manual:{t:"กรอกค่าผลลัพธ์โดยตรง",f:()=>"ผู้รับผิดชอบกรอกค่าที่คำนวณแล้ว"},
+  qualitative:{t:"ประเมินผ่าน/ไม่ผ่าน",f:()=>"ผู้รับผิดชอบระบุผลผ่าน/ไม่ผ่าน"}};
+const COND={">=":"≥",">":">","<=":"≤","<":"<"};
+const ST={pass:{t:"ผ่าน",c:"pass"},forced:{t:"ผ่าน (ระบุเหตุผล)",c:"pass"},watch:{t:"ผ่าน*** เฝ้าระวัง",c:"watch"},near:{t:"ไม่ผ่าน (ใกล้เกณฑ์)",c:"near"},fail:{t:"ไม่ผ่าน",c:"fail"},pending:{t:"รอประเมิน",c:"pending"},notarget:{t:"รอกำหนดเกณฑ์",c:"pending"},na:{t:"ไม่ประเมิน",c:"na"}};
+const DEPTS=["กลุ่มงานส่งเสริมสุขภาพ","กลุ่มงานควบคุมโรคติดต่อ","กลุ่มงานควบคุมโรคไม่ติดต่อสุขภาพจิตและยาเสพติด","กลุ่มงานพัฒนาคุณภาพและรูปแบบบริการ","กลุ่มงานอนามัยสิ่งแวดล้อมและอาชีวอนามัย","กลุ่มงานบริหารทรัพยากรบุคคล","กลุ่มงานคุ้มครองผู้บริโภคและเภสัชสาธารณสุข","กลุ่มงานทันตสาธารณสุข","กลุ่มงานการแพทย์แผนไทยและสมุนไพร","กลุ่มงานประกันสุขภาพ","กลุ่มงานพัฒนายุทธศาสตร์สาธารณสุข","กลุ่มงานสุขภาพดิจิทัล","กลุ่มงานบริหารทั่วไป","กลุ่มกฎหมาย"];
+const AFFS=[{id:"all",name:"ทุกหน่วยบริการ"},{id:"moph",name:"ในสังกัด สป.สธ."},{id:"other",name:"นอกสังกัด สป.สธ."}];
+const affName=id=>(AFFS.find(a=>a.id===id)||AFFS[0]).name;
+const DIST_CODE={"6501":"d01","6502":"d02","6503":"d03","6504":"d04","6505":"d05","6506":"d06","6507":"d07","6508":"d08","6509":"d09"};
+const DEFAULT_SETTINGS={year:2570,periods:[{id:"r1",name:"รอบ 3 เดือน",start:"2026-10-01",end:"2026-12-31"},{id:"r2",name:"รอบ 6 เดือน",start:"2026-10-01",end:"2027-03-31"},{id:"r3",name:"รอบ 9 เดือน",start:"2026-10-01",end:"2027-06-30"},{id:"r4",name:"รอบ 12 เดือน",start:"2026-10-01",end:"2027-09-30"}],currentPeriod:"r1",depts:DEPTS,otherHosp:[],types:[{id:"hkpi",name:"Health KPI"},{id:"insp",name:"ตรวจราชการ"},{id:"pa",name:"PA"},{id:"flag",name:"10 Flagship"},{id:"one",name:"7 ONE"}]};
+
+/* ================= STATE ================= */
+const S={db:null,user:null,myId:null,isAdmin:false,canWrite:null,kpis:[],byId:{},kidsOf:{},results:{},hdc:{},member:null,myReq:null,members:{},requests:{},aff:"all",entryAff:"moph",settings:DEFAULT_SETTINGS,
+  period:null,area:"P",view:"dashboard",demoOn:false,demoTouched:false,demo:null,loadedK:false,loadedR:false,
+  exF:"all",typeF:"all",stF:"all",q:"",open:new Set(),adminTab:"kpis",entrySel:null,entryMineOnly:true,entryDirty:false,dbError:null};
+
+/* ================= HELPERS ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=x=>{if(x===""||x==null)return null;const n=Number(x);return Number.isFinite(n)?n:null};
+const fmtInt=n=>Number(n).toLocaleString("en-US");
+const fmtN=(v,d=2)=>v==null?"—":Number(v).toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const isPend=s=>s==="pending"||s==="notarget";
+const isPass=s=>s==="pass"||s==="watch"||s==="forced";
+const areaName=id=>(AREAS.find(a=>a.id===id)||{}).name||id;
+const excOf=id=>EXC.find(e=>e.id===id)||EXC[0];
+function toast(msg){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+function chip(st){const m=ST[st]||ST.pending;return `<span class="chip s-${m.c}">${esc(m.t)}</span>`}
+
+/* ================= CALC ENGINE ================= */
+function kidsOf(k){return S.kidsOf[k.id]||[]}
+function inclDistricts(k){return (k.districts==="all"||!Array.isArray(k.districts)||!k.districts.length)?DIST_IDS:k.districts.filter(d=>DIST_IDS.includes(d))}
+function hasOwn(k){return !kidsOf(k).length||!!k.hasOwn}
+function ownApplicable(k,area){if(!hasOwn(k))return false;if(S.aff==="other"&&!k.affSplit)return false;if(area==="P")return true;return k.level==="district"&&inclDistricts(k).includes(area)}
+function applicable(k,area){return ownApplicable(k,area)||kidsOf(k).some(c=>applicable(c,area))}
+function resKey(kid,area,per,aff){return `${kid}~${area}~${per}~${aff||"moph"}`}
+function recOf(k,area,aff){const key=resKey(k.id,area,S.period,aff);if(S.demoOn)return S.demo&&S.demo.res[key];const r=S.results[key],h=S.hdc[key];const src=(r&&r.src)||(h?"hdc":"manual");
+  if(src==="hdc"){if(!h)return r&&r.forcePass?{forcePass:true,note:r.note,src:"hdc",asOf:r.asOf}:null;return {...h,forcePass:!!(r&&r.forcePass),note:r?r.note:"",src:"hdc",asOf:h.asOf}}
+  return r?{...r,src:"manual"}:null}
+function combineRec(k,r1,r2){const ok=[r1,r2].filter(r=>hasData(k,r));if(ok.length<2)return ok[0]||null;const nums=ok.filter(r=>hasNum(k,r));
+  const asOf=[r1.asOf,r2.asOf].filter(Boolean).sort()[0]||null;const note=[r1.note,r2.note].filter(Boolean).join(" / ");
+  if(!nums.length)return {forcePass:true,note,asOf,src:"mix"};if(nums.length===1)return {...nums[0],asOf,note};
+  const o={a:(num(r1.a)||0)+(num(r2.a)||0),b:(num(r1.b)||0)+(num(r2.b)||0),p:[],asOf,note,src:r1.src===r2.src?r1.src:"mix"};
+  const n=Math.max((r1.p||[]).length,(r2.p||[]).length);for(let i=0;i<n;i++)o.p[i]=(num((r1.p||[])[i])||0)+(num((r2.p||[])[i])||0);
+  if(k.formula==="qualitative")o.pass=r1.pass===false||r2.pass===false?false:(r1.pass&&r2.pass?true:null);
+  if(k.formula==="manual")o.value=num(r1.value)!=null?num(r1.value):num(r2.value);return o}
+function getRes(kid,area){const k=S.byId[kid];if(!k)return null;if(S.aff!=="all"||!k.affSplit)return recOf(k,area,S.aff==="other"?"other":"moph");return combineRec(k,recOf(k,area,"moph"),recOf(k,area,"other"))}
+function effTarget(k){const t=num(k.target);if(t!=null)return t;return S.demoOn&&S.demo?S.demo.tgt[k.id]??null:null}
+function hasData(k,r){return !!r&&(r.forcePass===true||hasNum(k,r))}
+function hasNum(k,r){if(!r)return false;switch(k.formula){
+  case "qualitative":return r.pass===true||r.pass===false;
+  case "manual":return num(r.value)!=null;
+  case "count":return num(r.a)!=null;
+  case "change_prev":return num(r.a)!=null&&num((r.p||[])[0])!=null;
+  case "change_avg":{const n=k.years||3;const p=r.p||[];return num(r.a)!=null&&p.slice(0,n).filter(x=>num(x)!=null).length===n}
+  default:return num(r.a)!=null&&num(r.b)!=null}}
+function leafInputs(k,area){
+  if(area==="P"&&k.level==="district"&&(k.agg||"pooled")==="pooled"){
+    const ds=inclDistricts(k);let a=0,b=0,p=[],n=0,fails=0,vals=[],forcedN=0,numN=0,asofs=[],srcs=new Set();
+    for(const d of ds){const r=getRes(k.id,d);if(!hasData(k,r))continue;n++;if(r.asOf)asofs.push(r.asOf);if(r.src)srcs.add(r.src);if(r.forcePass)forcedN++;if(!hasNum(k,r))continue;numN++;a+=num(r.a)||0;b+=num(r.b)||0;(r.p||[]).forEach((x,i)=>{p[i]=(p[i]||0)+(num(x)||0)});if(r.pass===false)fails++;if(num(r.value)!=null)vals.push(num(r.value))}
+    if(!n)return null;
+    const out={a,b,p,reported:n,expected:ds.length,pooled:true,forcedN,numN,asOf:asofs.sort()[0]||null,src:srcs.size===1?[...srcs][0]:"mix"};if(!numN)out.forcePass=true;
+    if(k.formula==="qualitative")out.pass=fails>0?false:(n===ds.length?true:null);
+    if(k.formula==="manual")out.value=vals.length?vals.reduce((s,x)=>s+x,0)/vals.length:null;
+    return out}
+  const r=getRes(k.id,area);return hasData(k,r)?r:null}
+function valueOf(k,inp){if(!inp)return null;const A=num(inp.a),B=num(inp.b);switch(k.formula){
+  case "percent":return B>0?A/B*100:null;
+  case "rate":return B>0?A/B*(num(k.mult)||100000):null;
+  case "ratio":return B>0?A/B:null;
+  case "count":return A;
+  case "change_prev":{const P=num((inp.p||[])[0]);return P?(A-P)/Math.abs(P)*100:null}
+  case "change_avg":{const n=k.years||3;const ps=(inp.p||[]).slice(0,n).map(num);if(ps.length<n||ps.some(x=>x==null))return null;const m=ps.reduce((s,x)=>s+x,0)/n;return m?(A-m)/Math.abs(m)*100:null}
+  case "manual":return num(inp.value);
+  default:return null}}
+function statusOf(k,v,inp){
+  if(k.formula==="qualitative"){if(!inp||inp.pass==null)return "pending";return inp.pass?"pass":"fail"}
+  if(v==null)return "pending";const t=effTarget(k);if(t==null)return "notarget";
+  const c=k.cond||">=";const hi=c===">="||c===">";
+  const ok=c===">="?v>=t:c===">"?v>t:c==="<="?v<=t:v<t;
+  const tol=pct=>{const x=Math.abs(t)*pct/100;return x>1e-9?x:pct/10};
+  if(ok){const w=tol(num(k.watchPct)??(hi?10:5));if(w>0&&(hi?v<t+w:v>t-w))return "watch";return "pass"}
+  const nr=tol(num(k.nearPct)??5);if(nr>0&&(hi?v>=t-nr:v<=t+nr))return "near";return "fail"}
+function evalLeaf(k,area){const inp=leafInputs(k,area);const v=valueOf(k,inp);if(inp&&inp.forcePass)return {status:"forced",value:v,inp};return {status:statusOf(k,v,inp),value:v,inp}}
+function evalItem(k,area){
+  if(!applicable(k,area))return {status:"na"};
+  const ks=kidsOf(k);const own=ownApplicable(k,area)?evalLeaf(k,area):null;
+  if(!ks.length)return own;
+  const subs=ks.filter(c=>applicable(c,area)).map(c=>({k:c,...evalItem(c,area)}));
+  const rule=k.rule||"all";
+  if(rule==="own"&&own)return {...own,subs,derived:false};
+  const comps=[...(own?[own]:[]),...subs];
+  const passN=comps.filter(c=>isPass(c.status)).length;let status;
+  if(rule==="min"){const need=Math.min(Math.max(1,num(k.minPass)||1),comps.length);const pend=comps.filter(c=>isPend(c.status)).length;
+    status=passN>=need?(comps.some(c=>c.status==="watch")?"watch":"pass"):(passN+pend>=need?"pending":(comps.filter(c=>!isPass(c.status)&&!isPend(c.status)).every(c=>c.status==="near")?"near":"fail"))}
+  else{const bad=comps.filter(c=>c.status==="fail"||c.status==="near");
+    if(bad.length)status=bad.every(c=>c.status==="near")?"near":"fail";
+    else if(comps.some(c=>isPend(c.status)))status="pending";
+    else status=comps.some(c=>c.status==="watch")?"watch":"pass"}
+  return {status,value:own?own.value:null,inp:own?own.inp:null,subs,derived:true,summary:`ผ่าน ${passN}/${comps.length}`}}
+function typesOf(k){if(Array.isArray(k.types)&&k.types.length)return k.types;const p=k.parent&&S.byId[k.parent];return p?typesOf(p):[]}
+function matchType(k){return S.typeF==="all"||typesOf(k).includes(S.typeF)||kidsOf(k).some(matchType)}
+function typeLabels(k){const own=Array.isArray(k.types)&&k.types.length;const src=own?k:(k.parent&&S.byId[k.parent])||k;return typesOf(k).map(id=>{const n=typeName(id);if(!n)return "";const c=(src.typeCodes||{})[id];return c?`${n} ข้อ ${c}`:n}).filter(Boolean)}
+function typeName(id){return ((S.settings.types||[]).find(t=>t.id===id)||{}).name||""}
+function topItems(){return S.kpis.filter(k=>!k.parent||!S.byId[k.parent])}
+function countedItems(area){const out=[];for(const k of topItems()){const ks=kidsOf(k);const mode=ks.length?(k.countMode||"main"):"main";
+  const list=mode==="subs"?ks:mode==="both"?[k,...ks]:[k];for(const x of list)if(applicable(x,area)&&matchType(x))out.push(x)}return out}
+function tally(items,area){const t={total:0,pass:0,watch:0,near:0,fail:0,pending:0};for(const k of items){const s=evalItem(k,area).status;if(s==="na")continue;t.total++;if(s==="pass"||s==="forced")t.pass++;else if(s==="watch")t.watch++;else if(s==="near")t.near++;else if(s==="fail")t.fail++;else t.pending++}
+  t.passAll=t.pass+t.watch;t.evaluated=t.total-t.pending;t.rate=t.evaluated?t.passAll/t.evaluated*100:null;return t}
+/* ================= /CALC ENGINE ================= */
+
+function fmtValue(k,v){if(v==null)return "—";const d=num(k.dec)??2;switch(k.formula){
+  case "percent":return fmtN(v,d)+"%";
+  case "rate":return fmtN(v,d)+` ต่อ ${fmtInt(k.mult||100000)}`;
+  case "change_prev":case "change_avg":return (v<0?"ลดลง ":v>0?"เพิ่มขึ้น ":"")+fmtN(Math.abs(v),d)+"%";
+  case "count":return fmtN(v,num(k.dec)??0);
+  default:return fmtN(v,d)}}
+function shortValue(k,v){if(v==null)return "—";const d=Math.min(num(k.dec)??1,1);if(k.formula==="change_prev"||k.formula==="change_avg")return (v>0?"+":"")+fmtN(v,d);if(k.formula==="count")return fmtN(v,0);return fmtN(v,d)}
+function critText(k){const t=effTarget(k);const demoT=num(k.target)==null&&t!=null;
+  if(k.formula==="qualitative")return k.targetText||"ผ่านเกณฑ์ที่กำหนด";
+  if(t==null)return k.targetText?esc(k.targetText)+' <span class="meta">(ยังไม่กำหนดค่าคำนวณ)</span>':'<span class="meta">รอ KPI Template</span>';
+  let s=k.targetText&&!demoT?esc(k.targetText):`${COND[k.cond||">="]} ${esc(fmtValue(k,t))}`;
+  if(demoT)s+=' <span class="meta">(ตัวอย่าง)</span>';return s}
+function fmtDay(iso,short){if(!iso)return "—";const d=new Date(String(iso).slice(0,10)+"T00:00:00");if(isNaN(d))return "—";return d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:short?"2-digit":"numeric"}).replace(/[๐-๙]/g,c=>"๐๑๒๓๔๕๖๗๘๙".indexOf(c))}
+function asOfOf(k,area){if(!applicable(k,area))return null;if(hasOwn(k)&&ownApplicable(k,area)){const i=leafInputs(k,area);return i?{asOf:i.asOf||null,src:i.src||"manual"}:null}
+  const xs=kidsOf(k).map(c=>asOfOf(c,area)).filter(x=>x&&x.asOf);if(!xs.length)return null;return {asOf:xs.map(x=>x.asOf).sort()[0],src:[...new Set(xs.map(x=>x.src))].length===1?xs[0].src:"mix"}}
+function curPeriod(){return S.settings.periods.find(p=>p.id===S.period)||{}}
+function dataAsOf(area){const ds=[];for(const k of S.kpis){if(!hasOwn(k)||!matchType(k))continue;const x=asOfOf(k,area);if(x&&x.asOf)ds.push(x.asOf)}ds.sort();return {min:ds[0]||null,max:ds[ds.length-1]||null,n:ds.length}}
+function srcBadge(src){return src==="hdc"?'<span class="tchip src">HDC</span>':src==="mix"?'<span class="tchip src">HDC+บันทึก</span>':""}
+function fmtDate(d){return d?d.toLocaleDateString("th-TH",{day:"numeric",month:"short",year:"2-digit"}).replace(/[๐-๙]/g,c=>"๐๑๒๓๔๕๖๗๘๙".indexOf(c)):"—"}
+
+/* ================= GAP TO TARGET ================= */
+function gapThreshold(k,inp,t){const B=num(inp.b),p=inp.p||[];switch(k.formula){
+  case "percent":return B>0?t*B/100:null;case "rate":return B>0?t*B/(num(k.mult)||100000):null;case "ratio":return B>0?t*B:null;
+  case "count":return t;case "change_prev":{const P=num(p[0]);return P?P*(1+t/100):null}
+  case "change_avg":{const n=k.years||3;const ps=p.slice(0,n).map(num);if(ps.length<n||ps.some(x=>x==null))return null;const m=ps.reduce((s,x)=>s+x,0)/n;return m?m*(1+t/100):null}
+  default:return null}}
+function gapValueText(k,d){d=Math.abs(d);const dec=num(k.dec)??2;switch(k.formula){
+  case "percent":case "change_prev":case "change_avg":return fmtN(d,dec)+"%";
+  case "rate":return fmtN(d,dec)+` ต่อ ${fmtInt(k.mult||100000)}`;case "count":return fmtN(d,0)+(k.aUnit?" "+k.aUnit:"");default:return fmtN(d,dec)}}
+function gapInfo(k,ev){if(!ev||!ev.inp||!hasOwn(k)||k.formula==="qualitative")return null;if(!["pass","watch","near","fail"].includes(ev.status))return null;
+  const t=effTarget(k),v=ev.value;if(t==null||v==null)return null;
+  const c=k.cond||">=",hi=c[0]===">",ok=isPass(ev.status);const unit=k.aUnit||"";const al=k.aLabel||"ผลงาน (A)";
+  const A=num(ev.inp.a);const X=A==null?null:gapThreshold(k,ev.inp,t);
+  let lim=null;if(X!=null)lim=c===">="?Math.ceil(X-1e-9):c===">"?Math.floor(X+1e-9)+1:c==="<="?Math.floor(X+1e-9):Math.ceil(X-1e-9)-1;
+  const dv=gapValueText(k,t-v);const n=x=>fmtN(Math.max(0,x),0)+(unit?" "+unit:"");let main,cnt="",sh="";
+  const chg=k.formula==="change_prev"||k.formula==="change_avg";
+  if(chg){const one=`1${unit?" "+unit:""}`;
+    if(!ok&&hi){main=`ยังเพิ่มขึ้นไม่ถึงเกณฑ์ ขาดอีก ${dv}`;if(lim!=null){cnt=`ต้องเพิ่ม${al}อีก ${n(lim-A)}`;sh=`ขาด ${n(lim-A)}`}}
+    else if(!ok){main=`ยังลดลงไม่ถึงเกณฑ์ ต้องลดอีก ${dv}`;if(lim!=null){cnt=`ต้องลด${al}ลงอีก ${n(A-lim)}`;sh=`ลดอีก ${n(A-lim)}`}}
+    else if(hi){main=`เพิ่มขึ้นเกินเกณฑ์ ${dv}`;if(lim!=null){cnt=A-lim>0?`${al}ลดลงได้อีกไม่เกิน ${n(A-lim)} ยังผ่าน`:`ต้องรักษาระดับ หากลดลงอีก ${one} จะไม่ผ่าน`;sh=`เผื่อ ${n(A-lim)}`}}
+    else{main=`ลดลงได้ตามเกณฑ์แล้ว เผื่อ ${dv}`;if(lim!=null){cnt=lim-A>0?`${al}เพิ่มได้อีกไม่เกิน ${n(lim-A)}`:`ห้ามมีเพิ่ม หากเพิ่มอีก ${one} จะไม่ผ่าน`;sh=`เพิ่มได้ ${n(lim-A)}`}}
+    return {ok,main,cnt,short:sh,text:main+(cnt?" · "+cnt:"")}}
+  if(!ok&&hi){main=`ต่ำกว่าเกณฑ์ ${dv}`;if(lim!=null){cnt=`ต้องเพิ่ม${al}อีก ${n(lim-A)}`;sh=`ขาด ${n(lim-A)}`}}
+  else if(!ok&&!hi){main=`เกินเกณฑ์ ${dv}`;if(lim!=null){cnt=`${al}เกินเพดานแล้ว ${n(A-lim)}`;sh=`เกิน ${n(A-lim)}`}}
+  else if(ok&&hi){main=`สูงกว่าเกณฑ์ ${dv}`;if(lim!=null){cnt=A-lim>0?`${al}ลดลงได้อีกไม่เกิน ${n(A-lim)} ยังผ่าน`:`ต้องรักษาระดับ หากลดลงอีก 1${unit?" "+unit:""} จะไม่ผ่าน`;sh=`เผื่อ ${n(A-lim)}`}}
+  else{main=`ต่ำกว่าเพดาน ${dv} รักษาระดับไม่ให้เกิน ${gapValueText(k,t)}`;if(lim!=null){cnt=lim-A>0?`${al}เพิ่มได้อีกไม่เกิน ${n(lim-A)}`:`ห้ามมีเพิ่ม หากเพิ่มอีก 1${unit?" "+unit:""} จะไม่ผ่าน`;sh=`เพิ่มได้ ${n(lim-A)}`}}
+  return {ok,main,cnt,short:sh,text:main+(cnt?" · "+cnt:"")}}
+function gapHtml(k,ev){const g=gapInfo(k,ev);if(!g)return "";return `<div class="gap ${g.ok?"ok":"bad"}">${esc(g.main)}${g.cnt?`<br><b>${esc(g.cnt)}</b>`:""}</div>`}
+
+/* ================= DEMO DATA (in memory only) ================= */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function demoTarget(k){const lo=(k.cond||">=").startsWith("<");switch(k.formula){
+  case "percent":return lo?10:80;case "rate":return (num(k.mult)||100000)>=100000?(lo?15:50):(lo?4:10);case "ratio":return lo?1:1;
+  case "count":return 10;case "change_prev":case "change_avg":return lo?-3:5;default:return lo?10:80}}
+function buildDemo(){const rnd=mulberry32(2570);const res={},tgt={};
+  for(const k of S.kpis){if(!hasOwn(k))continue;const t=num(k.target)??demoTarget(k);tgt[k.id]=t;const lo=(k.cond||">=").startsWith("<");
+    const areas=k.level==="district"?inclDistricts(k):["P"];
+    for(const per of S.settings.periods)for(const a of areas){let v,r={};const j=rnd();
+      if(k.formula==="change_prev"||k.formula==="change_avg"){v=t+(j-0.35)*10;const base=80+rnd()*120;const n=k.formula==="change_avg"?(k.years||3):1;r.p=Array.from({length:n},()=>Math.round(base*(0.9+rnd()*0.2)));const m=r.p.reduce((s,x)=>s+x,0)/n;r.a=Math.max(0,Math.round(m*(1+v/100)))}
+      else if(k.formula==="count"){r.a=Math.round(t*(0.7+j*0.8))}
+      else if(k.formula==="qualitative"){r.pass=j>0.3}
+      else if(k.formula==="manual"){r.value=+(lo?t*(0.5+j*0.9):t*(0.82+j*0.3)).toFixed(2)}
+      else if(k.formula==="rate"){const mult=num(k.mult)||100000;r.b=Math.round((mult>=100000?60000:4000)*(0.6+rnd()*0.8));v=lo?t*(0.3+j*0.95):t*(0.85+j*0.4);r.a=Math.round(v*r.b/mult)}
+      else{r.b=Math.round(80+rnd()*500);v=lo?t*(0.35+j*0.85):Math.min(100,t+(j-0.3)*24);if(k.formula==="ratio")v=lo?t*(0.6+j*0.7):t*(0.7+j*0.6);r.a=Math.max(0,Math.min(k.formula==="percent"?r.b:Infinity,Math.round(r.b*v/(k.formula==="percent"?100:1))))}
+      const asOf=per.end&&per.end<"2026-10-28"?per.end:"2026-10-25";r.asOf=asOf;res[resKey(k.id,a,per.id,"moph")]=r;
+      if(k.affSplit&&k.formula!=="qualitative"&&k.formula!=="manual"){const o={asOf:"2026-10-20"};const f=0.15+rnd()*0.15;if(r.b!=null)o.b=Math.max(1,Math.round(r.b*f));if(r.a!=null)o.a=Math.max(0,Math.round(r.a*f*(0.85+rnd()*0.3)));if(r.p)o.p=r.p.map(x=>Math.round(x*f));if(o.b!=null&&o.a>o.b&&k.formula==="percent")o.a=o.b;res[resKey(k.id,a,per.id,"other")]=o}}}
+  return {res,tgt}}
+
+/* ================= PEOPLE ================= */
+async function paintPeople(root){if(!S.user)return;const els=[...(root||document).querySelectorAll("[data-uid]")];if(!els.length)return;
+  const ids=[...new Set(els.map(e=>e.dataset.uid))];let ps={};try{ps=await S.user.profiles(ids)}catch(e){}
+  for(const e of els){const p=ps[e.dataset.uid];if(!p)continue;const n=e.querySelector(".pn");if(n)n.textContent=p.name||"ผู้ใช้ที่ไม่ระบุชื่อ";const im=e.querySelector("img");if(im)im.src=p.avatarUrl}}
+function personChip(id,removable){return `<span class="person" data-uid="${esc(id)}"><img alt=""><span class="pn">…</span>${removable?`<button type="button" data-rm="${esc(id)}" aria-label="นำออก">×</button>`:""}</span>`}
+
+/* ================= DATA INDEX ================= */
+function indexKpis(list){S.kpis=list.slice().sort((a,b)=>(num(a.order)??999)-(num(b.order)??999)||String(a.code).localeCompare(String(b.code)));
+  S.byId={};S.kidsOf={};for(const k of S.kpis)S.byId[k.id]=k;for(const k of S.kpis)if(k.parent&&S.byId[k.parent])(S.kidsOf[k.parent]=S.kidsOf[k.parent]||[]).push(k)}
+
+/* ================= RENDER: SHELL ================= */
+function setView(v){if(v==="entry"&&!S.myId)v="dashboard";if(v==="admin"&&!S.isAdmin)v="dashboard";S.view=v;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-current",t.dataset.view===v?"page":"false"));render()}
+function render(){$("#yearLbl").textContent=S.settings.year||2570;
+  const et=document.querySelector('[data-view="entry"]');et.hidden=!S.myId;et.textContent=S.isAdmin||(S.member&&S.member.status==="approved")?"บันทึกผล":"ลงทะเบียน/บันทึกผล";
+  const rc=$("#roleChip");if(rc)rc.textContent=S.isAdmin?"ผู้ดูแลระบบ":(S.member&&S.member.status==="approved"?"ผู้รับผิดชอบ":"ผู้ใช้");
+  document.querySelector('[data-view="admin"]').hidden=!S.isAdmin;
+  if(S.view==="dashboard")renderDashboard();else if(S.view==="entry")renderEntry();else renderAdmin()}
+function periodSelect(id){return `<select id="${id}">${S.settings.periods.map(p=>`<option value="${esc(p.id)}" ${p.id===S.period?"selected":""}>${esc(p.name)}</option>`).join("")}</select>`}
+
+/* ================= RENDER: DASHBOARD ================= */
+function renderDashboard(){const app=$("#app");
+  if(S.dbError){app.innerHTML=`<div class="panel empty">${esc(S.dbError)}</div>`;return}
+  if(!S.loadedK){app.innerHTML=`<div class="empty">กำลังโหลดข้อมูลตัวชี้วัด…</div>`;return}
+  if(!S.kpis.length&&!S.myId&&window.PLK_CONFIG&&PLK_CONFIG.publicRead===false){app.innerHTML=`<div class="panel empty"><h2>กรุณาเข้าสู่ระบบ</h2><p>กด “เข้าสู่ระบบ” มุมขวาบนเพื่อดูแดชบอร์ดตัวชี้วัด</p></div>`;return}
+  if(!S.kpis.length){app.innerHTML=`<div class="panel empty"><h2>ยังไม่มีรายการตัวชี้วัด</h2><p>ผู้ดูแลระบบเพิ่มตัวชี้วัดได้ที่แท็บ “ผู้ดูแลระบบ”</p></div>`;return}
+  const area=S.area;const items=countedItems(area);const T=tally(items,area);
+  const anyReal=Object.keys(S.results).length>0;
+  let h=`<div class="bar">
+    <label>รอบรายงาน${periodSelect("dPer")}</label>
+    <label>ประเภทตัวชี้วัด<select id="dType"><option value="all">ทุกประเภท</option>${(S.settings.types||[]).map(t=>`<option value="${esc(t.id)}" ${S.typeF===t.id?"selected":""}>${esc(t.name)}</option>`).join("")}</select></label>
+    <label>หน่วยบริการ<select id="dAff">${AFFS.map(a=>`<option value="${a.id}" ${S.aff===a.id?"selected":""}>${esc(a.name)}</option>`).join("")}</select></label>
+    <label>พื้นที่<select id="dArea">${AREAS.map(a=>`<option value="${a.id}" ${a.id===area?"selected":""}>${esc(a.name)}</option>`).join("")}</select></label>
+    <label class="toggle" style="margin-left:auto"><input type="checkbox" id="demoT" ${S.demoOn?"checked":""}> แสดงข้อมูลตัวอย่าง</label>${exportMenu("dash")}</div>`;
+  {const per=curPeriod();const da=dataAsOf(area);const cut=per.asOf||da.max;
+   h+=`<div class="asof"><span><b>ข้อมูล ณ วันที่ ${cut?esc(fmtDay(cut)):"— ยังไม่มีข้อมูล"}</b>${per.asOf?' <span class="meta">(วันที่ตัดข้อมูลของรอบ)</span>':""}</span>${per.start?`<span>ช่วงผลงาน ${esc(fmtDay(per.start))} – ${esc(fmtDay(per.end))}</span>`:""}<span>${esc(affName(S.aff))}</span>${da.min&&da.max&&da.min!==da.max?`<span class="meta">ตัวชี้วัดแต่ละตัวมีข้อมูล ณ วันที่ต่างกัน ตั้งแต่ ${esc(fmtDay(da.min))} ถึง ${esc(fmtDay(da.max))} ดูได้ในคอลัมน์ “ข้อมูล ณ”</span>`:""}</div>`}
+  if(S.demoOn)h+=`<div class="banner"><b>กำลังแสดงข้อมูลตัวอย่าง</b> ผลงานและเกณฑ์ที่ยังไม่กำหนดเป็นค่าสุ่มเพื่อดูหน้าตาแดชบอร์ดเท่านั้น ไม่ใช่ผลการดำเนินงานจริง${anyReal?"":" (ยังไม่มีการบันทึกผลจริง)"} ปิดได้ที่ช่อง “แสดงข้อมูลตัวอย่าง”</div>`;
+  else if(!anyReal)h+=`<div class="banner">ยังไม่มีการบันทึกผลจริงในรอบนี้ สถานะทุกตัวจึงเป็น “รอประเมิน” เปิด “แสดงข้อมูลตัวอย่าง” เพื่อดูหน้าตาแดชบอร์ดเมื่อมีข้อมูล</div>`;
+  h+=`<section class="tiles" aria-label="สรุปภาพรวม">
+    <div class="tile"><div class="k">ตัวชี้วัดที่ประเมิน</div><div class="v num">${T.total}</div><div class="s">${esc(areaName(area))}${S.typeF!=="all"?" · "+esc(typeName(S.typeF)):""}</div></div>
+    <div class="tile pass"><div class="k">ผ่านเกณฑ์</div><div class="v num">${T.passAll}</div><div class="s">เฝ้าระวัง (เขียว***) ${T.watch}</div></div>
+    <div class="tile near"><div class="k">ใกล้เกณฑ์</div><div class="v num">${T.near}</div><div class="s">ไม่ผ่านแต่ใกล้เกณฑ์</div></div>
+    <div class="tile fail"><div class="k">ไม่ผ่านเกณฑ์</div><div class="v num">${T.fail}</div><div class="s">ห่างจากเกณฑ์</div></div>
+    <div class="tile pend"><div class="k">รอประเมิน</div><div class="v num">${T.pending}</div><div class="s">ไม่มีผลงานหรือเกณฑ์</div></div>
+    <div class="tile rate"><div class="k">ร้อยละความสำเร็จ</div><div class="v num">${T.rate==null?"—":fmtN(T.rate,1)+"%"}</div><div class="s">ผ่าน ${T.passAll} จากที่ประเมินแล้ว ${T.evaluated}</div></div></section>`;
+  h+=`<section><h2 style="font-size:18px;margin-bottom:10px">ผลการดำเนินงานราย Excellence</h2><div class="exgrid">${EXC.map(e=>{const it=items.filter(k=>k.exc===e.id);const t=tally(it,area);
+    const w=x=>t.total?(x/t.total*100):0;
+    return `<button class="ex" style="--c:${e.c}" data-ex="${e.id}" aria-pressed="${S.exF===e.id}"><div class="n">${esc(e.name)}</div><div class="p num">${t.rate==null?"—":fmtN(t.rate,1)+"%"} <small>ผ่าน ${t.passAll}/${t.evaluated}</small></div>
+      <div class="stack"><i class="pass" style="width:${w(t.pass)}%"></i><i class="watch" style="width:${w(t.watch)}%"></i><i class="near" style="width:${w(t.near)}%"></i><i class="fail" style="width:${w(t.fail)}%"></i></div>
+      <div class="counts"><span>ทั้งหมด <b class="num">${t.total}</b></span><span>ผ่าน <b class="num">${t.passAll}</b></span><span>ไม่ผ่าน <b class="num">${t.near+t.fail}</b></span><span>รอ <b class="num">${t.pending}</b></span></div></button>`}).join("")}</div></section>`;
+  // districts
+  const drows=DISTRICTS.map(d=>{const t=tally(countedItems(d.id),d.id);return {d,t}});
+  h+=`<section class="two"><div class="panel"><h2>ร้อยละความสำเร็จรายอำเภอ<small>เฉพาะตัวชี้วัดที่วัดในอำเภอนั้น</small></h2><div class="dist">
+    ${drows.map(({d,t})=>{const w=x=>t.total?(x/t.total*100):0;return `<button class="drow" data-area="${d.id}" aria-pressed="${S.area===d.id}"><span class="nm">${esc(d.name)}</span>
+      <span class="stack" style="margin:0"><i class="pass" style="width:${w(t.pass)}%"></i><i class="watch" style="width:${w(t.watch)}%"></i><i class="near" style="width:${w(t.near)}%"></i><i class="fail" style="width:${w(t.fail)}%"></i></span>
+      <span class="pc num"><b>${t.rate==null?"—":fmtN(t.rate,1)+"%"}</b> ${t.passAll}/${t.evaluated}</span></button>`}).join("")}
+    </div><p class="note" style="margin:10px 0 0">ร้อยละ = ผ่าน ÷ ตัวชี้วัดที่ประเมินแล้วของอำเภอนั้น · อำเภอเมืองพิษณุโลกเป็นศูนย์รับส่งต่อ ตัวชี้วัดด้านอัตราตายควรตีความร่วมกับ case-mix</p>
+    <div class="legend" style="margin-top:10px">${["pass","watch","near","fail","pending"].map(s=>chip(s)).join("")}</div></div>`;
+  // matrix
+  const mx=[];for(const k of topItems()){if(S.exF!=="all"&&k.exc!==S.exF)continue;if(!matchType(k))continue;mx.push([k,0]);for(const c of kidsOf(k))if(matchType(c))mx.push([c,1])}
+  h+=`<div class="panel"><h2>สถานะรายตัวชี้วัด × พื้นที่<small>${esc(periodName())}</small></h2><div class="scroll" style="max-height:560px"><table class="mx"><thead><tr><th class="name">ตัวชี้วัด</th>${AREAS.map(a=>`<th>${a.id==="P"?"จังหวัด":esc(a.name.replace("พิษณุโลก",""))}</th>`).join("")}</tr></thead><tbody>
+    ${mx.map(([k,lv])=>`<tr><td class="name" title="${esc(k.name)}" style="${lv?"padding-left:22px":""}"><span class="code">${esc(k.code)}</span>${esc(k.name)}</td>${AREAS.map(a=>{const ev=evalItem(k,a.id);if(ev.status==="na")return `<td class="c"><span class="cell s-na">·</span></td>`;
+      const lbl=ev.status==="forced"&&ev.value==null?"ผ่าน*":ev.value!=null?shortValue(k,ev.value)+(ev.status==="forced"?"*":""):(ev.derived&&ev.summary?ev.summary.replace("ผ่าน ",""):(isPend(ev.status)?"รอ":ST[ev.status].t));
+      return `<td class="c"><button class="cell s-${ST[ev.status].c}" data-open="${esc(k.id)}" title="${esc(areaName(a.id))}: ${esc(ST[ev.status].t)}${(()=>{const g=gapInfo(k,ev);return g?" · "+esc(g.text):""})()}">${esc(lbl)}</button></td>`}).join("")}</tr>`).join("")}
+    </tbody></table></div></div></section>`;
+  // list
+  h+=`<section class="panel"><h2>รายการตัวชี้วัด<small>${esc(areaName(area))} · ${esc(periodName())}</small></h2>
+    <div class="filters"><button class="fchip" data-exf="all" aria-pressed="${S.exF==="all"}">ทุก Excellence</button>${EXC.map(e=>`<button class="fchip" data-exf="${e.id}" aria-pressed="${S.exF===e.id}"><span class="exdot" style="--c:${e.c}"></span>${esc(e.name.replace(" Excellence",""))}</button>`).join("")}
+    <span style="width:8px"></span>${[["all","ทุกสถานะ"],["pass","ผ่าน"],["near","ใกล้เกณฑ์"],["fail","ไม่ผ่าน"],["pending","รอประเมิน"]].map(([v,t])=>`<button class="fchip" data-stf="${v}" aria-pressed="${S.stF===v}">${t}</button>`).join("")}
+    <input type="search" id="q" placeholder="ค้นหาชื่อหรือเลขตัวชี้วัด" value="${esc(S.q)}" style="margin-left:auto;min-width:200px"></div>
+    <div class="scroll">${listTable(area)}</div></section>`;
+  app.innerHTML=h;
+  $("#dPer").onchange=e=>{changePeriod(e.target.value)};
+  $("#dArea").onchange=e=>{S.area=e.target.value;render()};
+  $("#dType").onchange=e=>{S.typeF=e.target.value;render()};
+  $("#dAff").onchange=e=>{S.aff=e.target.value;render()};
+  $("#demoT").onchange=e=>{S.demoOn=e.target.checked;S.demoTouched=true;if(S.demoOn&&!S.demo)S.demo=buildDemo();render()};
+  app.querySelectorAll("[data-ex]").forEach(b=>b.onclick=()=>{S.exF=S.exF===b.dataset.ex?"all":b.dataset.ex;render()});
+  app.querySelectorAll("[data-exf]").forEach(b=>b.onclick=()=>{S.exF=b.dataset.exf;render()});
+  app.querySelectorAll("[data-stf]").forEach(b=>b.onclick=()=>{S.stF=b.dataset.stf;render()});
+  app.querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{S.area=S.area===b.dataset.area?"P":b.dataset.area;render()});
+  app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openDetail(b.dataset.open));
+  app.querySelectorAll("[data-tog]").forEach(b=>b.onclick=()=>{const id=b.dataset.tog;S.open.has(id)?S.open.delete(id):S.open.add(id);render()});
+  const q=$("#q");q.oninput=()=>{S.q=q.value;const pos=q.selectionStart;render();const n=$("#q");n.focus();n.setSelectionRange(pos,pos)}}
+function periodName(){return (S.settings.periods.find(p=>p.id===S.period)||{}).name||""}
+function listTable(area){const q=S.q.trim().toLowerCase();let rows="";
+  for(const e of EXC){if(S.exF!=="all"&&S.exF!==e.id)continue;const tops=topItems().filter(k=>k.exc===e.id&&matchType(k));let body="",lastPlan=null;
+    for(const k of tops){const ev=evalItem(k,area);if(ev.status==="na")continue;
+      const st=S.stF;const match=s=>st==="all"||(st==="pass"&&isPass(s))||(st==="near"&&s==="near")||(st==="fail"&&s==="fail")||(st==="pending"&&isPend(s));
+      const kids=kidsOf(k).filter(c=>applicable(c,area));const kidEv=kids.map(c=>[c,evalItem(c,area)]);
+      const textHit=x=>!q||x.name.toLowerCase().includes(q)||String(x.code).toLowerCase().includes(q);
+      if(!(match(ev.status)||kidEv.some(([,v])=>match(v.status))))continue;if(!(textHit(k)||kids.some(textHit)))continue;
+      if(k.plan&&k.plan!==lastPlan){body+=`<tr class="plan"><td colspan="5">แผนงาน ${esc(k.plan)}${k.project?` · โครงการ ${esc(k.project)}`:""}</td></tr>`;lastPlan=k.plan}
+      body+=rowHtml(k,ev,area,kids.length);
+      if(kids.length&&(S.open.has(k.id)||q||st!=="all"))for(const [c,v] of kidEv)body+=rowHtml(c,v,area,0,true)}
+    if(body)rows+=`<tr class="grp" style="--c:${e.c}"><td colspan="5"><span class="exdot"></span>${esc(e.name)}</td></tr>`+body}
+  if(!rows)return `<div class="empty">ไม่พบตัวชี้วัดตามตัวกรอง</div>`;
+  return `<table class="list"><thead><tr><th>ตัวชี้วัด</th><th>เกณฑ์</th><th>ผลงาน</th><th>สถานะ</th><th>ข้อมูล ณ</th></tr></thead><tbody>${rows}</tbody></table>`}
+function rowHtml(k,ev,area,nKids,isSub){
+  const val=ev.value!=null?fmtValue(k,ev.value):(ev.derived?ev.summary:"—");
+  const rep=ev.inp&&ev.inp.pooled&&ev.inp.reported<ev.inp.expected?`<div class="meta">รายงาน ${ev.inp.reported}/${ev.inp.expected} อำเภอ</div>`:"";
+  const tog=nKids?` <button class="btn small" data-tog="${esc(k.id)}" aria-expanded="${S.open.has(k.id)}">${S.open.has(k.id)?"ซ่อน":"แสดง"}ตัวย่อย ${nKids}</button>`:"";
+  return `<tr class="${isSub?"sub":""}"><td><button class="row-btn" data-open="${esc(k.id)}"><span class="code">${esc(k.code)}</span><span class="t">${esc(k.name)}</span></button>${tog}
+    <div class="meta">${k.level==="district"?"ระดับอำเภอ":"ระดับจังหวัด"}${k.dept?" · "+esc(k.dept):""}${typeLabels(k).map(t=>` <span class="tchip">${esc(t)}</span>`).join("")}</div></td>
+    <td>${critText(k)}</td><td class="num">${esc(val)}${rep}${gapHtml(k,ev)}</td><td>${chip(ev.status)}</td><td class="meta" style="white-space:nowrap">${(()=>{const x=asOfOf(k,area);return x&&x.asOf?esc(fmtDay(x.asOf,true))+" "+srcBadge(x.src):"—"})()}</td></tr>`}
+
+/* ================= DETAIL DRAWER ================= */
+function closeDrawer(){const was=!!$("#drawerHost").innerHTML;$("#drawerHost").innerHTML="";if(was&&S.view==="admin")render()}
+function openDrawer(html,onMount){const host=$("#drawerHost");host.innerHTML=`<div class="drawer-bg" data-close></div><aside class="drawer" role="dialog" aria-modal="true">${html}</aside>`;
+  host.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeDrawer);onMount&&onMount(host.querySelector(".drawer"));paintPeople(host);
+  const f=host.querySelector(".drawer button,.drawer input");f&&f.focus()}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#drawerHost").innerHTML)closeDrawer()});
+function inputsText(k,inp){if(!inp)return "—";if(inp.forcePass&&!hasNum(k,inp))return inp.pooled?`ระบุผ่านทุกอำเภอที่รายงาน (${inp.reported})`:"ระบุผ่าน";const p=inp.p||[];switch(k.formula){
+  case "percent":case "rate":case "ratio":return `A ${fmtN(num(inp.a),0)} / B ${fmtN(num(inp.b),0)}`;
+  case "count":return `A ${fmtN(num(inp.a),0)}`;
+  case "change_prev":return `ปีนี้ ${fmtN(num(inp.a),2)} / ปีก่อน ${fmtN(num(p[0]),2)}`;
+  case "change_avg":return `ปีนี้ ${fmtN(num(inp.a),2)} / ย้อนหลัง ${p.slice(0,k.years||3).map(x=>fmtN(num(x),2)).join(", ")}`;
+  case "qualitative":return inp.pass===true?"ผ่าน":inp.pass===false?"ไม่ผ่าน":"—";
+  default:return fmtN(num(inp.value),2)}}
+function openDetail(id){const k=S.byId[id];if(!k)return;S.detailId=id;const ks=kidsOf(k);const parent=k.parent&&S.byId[k.parent];
+  const rows=AREAS.filter(a=>applicable(k,a.id)).map(a=>{const ev=evalItem(k,a.id);const r=hasOwn(k)?getRes(k.id,a.id):null;const x=asOfOf(k,a.id);
+    return `<tr><td>${esc(a.name)}</td><td class="num">${hasOwn(k)?esc(inputsText(k,ev.inp)):esc(ev.summary||"")}</td><td class="num">${esc(ev.value!=null?fmtValue(k,ev.value):"—")}</td><td>${chip(ev.status)}</td><td>${gapHtml(k,ev)||'<span class="meta">—</span>'}</td><td class="meta" style="white-space:nowrap">${x&&x.asOf?esc(fmtDay(x.asOf,true))+" "+srcBadge(x.src):"—"}</td><td class="meta">${r&&r.forcePass?"<b>ระบุผ่าน:</b> ":""}${r&&r.note?esc(r.note):""}</td></tr>`}).join("");
+  const ruleTxt={all:"ตัวหลักผ่านเมื่อตัวย่อยผ่านทุกตัว",own:"ใช้ผลของตัวหลักเอง (ตัวย่อยไม่ผ่านก็ได้)",min:`ตัวหลักผ่านเมื่อผ่านอย่างน้อย ${k.minPass||1} ตัว`};
+  const cntTxt={main:"นับเฉพาะตัวหลัก",both:"นับตัวหลักและตัวย่อย",subs:"นับเฉพาะตัวย่อย"};
+  openDrawer(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="meta"><span class="exdot" style="--c:${excOf(k.exc).c}"></span>${esc(excOf(k.exc).name)}</div><h2><span class="code">${esc(k.code)}</span>${esc(k.name)}</h2></div><div class="bar" style="flex-wrap:nowrap">${exportMenu("detail")}<button class="btn small" data-close>ปิด</button></div></div>
+    ${parent?`<p class="note" style="margin:0">ตัวย่อยของ ${esc(parent.code)} ${esc(parent.name)}</p>`:""}
+    <dl class="dl"><dt>แผนงาน / โครงการ</dt><dd>${esc(k.plan||"—")}<br>${esc(k.project||"")}</dd>
+    <dt>สูตรคำนวณ</dt><dd>${hasOwn(k)?`${esc(FORMULAS[k.formula]?.t||"")} · ${esc(FORMULAS[k.formula]?.f(k)||"")}`:"ประเมินจากตัวย่อย"}${k.aLabel?`<div class="meta">A = ${esc(k.aLabel)}</div>`:""}${k.bLabel?`<div class="meta">B = ${esc(k.bLabel)}</div>`:""}</dd>
+    <dt>เกณฑ์</dt><dd>${critText(k)}</dd>
+    ${ks.length?`<dt>เงื่อนไขตัวย่อย</dt><dd>${esc(ruleTxt[k.rule||"all"])} · ${esc(cntTxt[k.countMode||"main"])}</dd>`:""}
+    <dt>หน่วยบริการ</dt><dd>${k.affSplit?"แยกบันทึก ในสังกัด / นอกสังกัด สป.สธ.":"บันทึกรวม (ไม่แยกสังกัด)"}${k.hdc&&k.hdc.on?` · รองรับข้อมูล HDC${k.hdc.report?" ("+esc(k.hdc.report)+")":""}`:""}</dd>
+    <dt>ระดับการประเมิน</dt><dd>${k.level==="district"?`อำเภอ (${inclDistricts(k).length===9?"ทุกอำเภอ":inclDistricts(k).map(areaName).join(", ")}) · ภาพรวมจังหวัด${(k.agg||"pooled")==="pooled"?"คำนวณจากผลรวมของอำเภอ":"กรอกแยก"}`:"จังหวัด"}</dd>
+    <dt>ประเภทตัวชี้วัด</dt><dd>${typeLabels(k).map(t=>`<span class="tchip">${esc(t)}</span>`).join(" ")||"—"}</dd>
+    <dt>กลุ่มงาน</dt><dd>${esc(k.dept||"—")}</dd>${k.moph?`<dt>หน่วยงานเจ้าภาพส่วนกลาง</dt><dd>${esc(k.moph)}</dd>`:""}
+    <dt>ผู้รับผิดชอบ</dt><dd><div class="people">${(k.owners||[]).map(id=>personChip(id)).join("")||'<span class="meta">ยังไม่กำหนด</span>'}</div></dd>
+    ${k.template?`<dt>KPI Template</dt><dd><a href="${esc(k.template)}" target="_blank" rel="noopener">เปิดเอกสาร</a></dd>`:""}
+    ${k.remark?`<dt>หมายเหตุ</dt><dd>${esc(k.remark)}</dd>`:""}</dl>
+    <h3 style="font-size:16px">ผลรายพื้นที่ · ${esc(periodName())} · ${esc(affName(S.aff))}${S.demoOn?' <span class="meta">(ข้อมูลตัวอย่าง)</span>':""}</h3>
+    <div class="scroll"><table class="etable"><thead><tr><th>พื้นที่</th><th>ข้อมูล</th><th>ผลงาน</th><th>สถานะ</th><th>ระยะห่างจากเกณฑ์</th><th>ข้อมูล ณ</th><th>หมายเหตุ</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${hasOwn(k)?'<p class="note" style="margin:0">จำนวนที่ต้องเพิ่มหรือเพิ่มได้คำนวณจากตัวหาร (B) ปัจจุบัน หาก B เปลี่ยนในรอบถัดไป จำนวนจะเปลี่ยนตาม</p>':""}
+    ${ks.length?`<h3 style="font-size:16px">ตัวย่อย</h3><div>${ks.map(c=>`<button class="btn small" style="margin:0 6px 6px 0" data-sub="${esc(c.id)}">${esc(c.code)} ${esc(c.name.slice(0,40))}${c.name.length>40?"…":""}</button>`).join("")}</div>`:""}
+    ${parent?`<div><button class="btn small" data-sub="${esc(parent.id)}">กลับไปตัวหลัก ${esc(parent.code)}</button></div>`:""}`,
+    d=>d.querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>openDetail(b.dataset.sub)))}
+
+/* ================= RENDER: ENTRY ================= */
+const todayISO=()=>new Date().toLocaleDateString("sv-SE");
+function withCtx(aff,fn){const sa=S.aff,sd=S.demoOn;S.aff=aff;S.demoOn=false;try{return fn()}finally{S.aff=sa;S.demoOn=sd}}
+function entryAreas(k){if(k.level==="district"){const a=inclDistricts(k).slice();if((k.agg||"pooled")==="manual")a.unshift("P");return a}return ["P"]}
+function entryAffs(k){return k.affSplit?["moph","other"]:["moph"]}
+function isMine(k){const m=S.member;const par=k.parent&&S.byId[k.parent];const approved=m&&m.status==="approved";
+  return (approved&&((m.depts||[]).includes(k.dept)||(par&&(m.depts||[]).includes(par.dept))))||(k.owners||[]).includes(S.myId)||!!(par&&(par.owners||[]).includes(S.myId))}
+function canEnter(k){if(S.isAdmin)return true;if(!S.member||S.member.status!=="approved")return false;return isMine(k)}
+function myItems(){if(!S.myId)return [];return S.kpis.filter(k=>hasOwn(k)&&canEnter(k)&&(S.isAdmin?isMine(k):true))}
+function entryList(){return S.isAdmin&&!S.entryMineOnly?S.kpis.filter(hasOwn):myItems()}
+function renderEntry(){const app=$("#app");if(S.entryDirty&&$("#entryForm")){refreshEntryList();return}
+  if(!S.myId){app.innerHTML=`<div class="panel empty">กด “เข้าสู่ระบบ” มุมขวาบนเพื่อบันทึกผล</div>`;return}
+  const approved=S.member&&S.member.status==="approved";
+  if(!S.isAdmin&&!approved){renderRegister(app);return}
+  const list=entryList();if(S.entrySel&&!list.find(k=>k.id===S.entrySel))S.entrySel=null;if(!S.entrySel&&list.length)S.entrySel=list[0].id;
+  let h=`<div class="bar"><h1 style="font-size:22px;margin-right:auto">บันทึกผลการดำเนินงาน</h1>${exportMenu("entry")}<label>รอบรายงาน${periodSelect("ePer")}</label>
+    ${S.isAdmin?`<label class="toggle"><input type="checkbox" id="mineOnly" ${S.entryMineOnly?"checked":""}> เฉพาะที่ฉันรับผิดชอบ</label>`:""}</div>
+    ${approved&&!S.isAdmin?`<p class="note" style="margin:0">สิทธิ์บันทึกผลของคุณ: ${(S.member.depts||[]).map(esc).join(", ")||"เฉพาะตัวชี้วัดที่ได้รับมอบหมาย"}</p>`:""}`;
+  if(!list.length){h+=`<div class="panel empty">${S.isAdmin?"ยังไม่มีตัวชี้วัดที่คุณรับผิดชอบ ยกเลิกช่อง “เฉพาะที่ฉันรับผิดชอบ” เพื่อบันทึกแทนผู้รับผิดชอบ":"ยังไม่มีตัวชี้วัดของกลุ่มงานที่คุณได้รับสิทธิ์ ติดต่อผู้ดูแลระบบ"}</div>`;app.innerHTML=h;bindEntryTop();return}
+  h+=`<div class="entry"><div class="panel" style="padding:10px"><div class="mine" id="mineList"></div></div><div class="panel" id="entryPane"></div></div>`;
+  app.innerHTML=h;bindEntryTop();refreshEntryList();renderEntryForm()}
+function renderRegister(app){const q=S.myReq,m=S.member;const depts=S.settings.depts||DEPTS;const sel=new Set((q&&q.depts)||[]);
+  let status="";
+  if(m&&m.status==="revoked")status=`<div class="banner">สิทธิ์บันทึกผลของบัญชีนี้ถูกระงับ ติดต่อผู้ดูแลระบบ</div>`;
+  else if(q&&q.status==="pending")status=`<div class="banner">ส่งคำขอแล้วเมื่อ ${esc(fmtDate(new Date(q.requestedAt)))} รอผู้ดูแลระบบอนุมัติ แก้ไขคำขอได้ด้านล่าง</div>`;
+  else if(q&&q.status==="rejected")status=`<div class="banner">คำขอไม่ได้รับอนุมัติ${q.reason?": "+esc(q.reason):""} ส่งคำขอใหม่ได้ด้านล่าง</div>`;
+  app.innerHTML=`<div class="bar"><h1 style="font-size:22px;margin-right:auto">ลงทะเบียนผู้รับผิดชอบตัวชี้วัด</h1></div>${status}
+  <form class="panel" id="regForm" style="max-width:760px"><p class="note" style="margin-top:0">ผู้รับผิดชอบตัวชี้วัดของแต่ละกลุ่มงานลงทะเบียนที่นี่ เมื่อผู้ดูแลระบบอนุมัติแล้วจะบันทึกผลตัวชี้วัดของกลุ่มงานที่ได้รับสิทธิ์ได้</p>
+  <div class="form"><div class="f full"><span>กลุ่มงานที่รับผิดชอบ (เลือกได้มากกว่า 1)</span><div class="checks">${depts.map(d=>`<label><input type="checkbox" class="rDept" value="${esc(d)}" ${sel.has(d)?"checked":""}> ${esc(d)}</label>`).join("")}</div></div>
+  <label class="f"><span>ตำแหน่ง</span><input type="text" id="rPos" value="${esc(q&&q.position||"")}" placeholder="เช่น นักวิชาการสาธารณสุขชำนาญการ"></label>
+  <label class="f"><span>เบอร์โทรติดต่อ</span><input type="text" id="rTel" value="${esc(q&&q.phone||"")}" inputmode="tel"></label>
+  <label class="f full"><span>ตัวชี้วัดที่รับผิดชอบ / หมายเหตุถึงผู้ดูแลระบบ</span><textarea id="rNote" rows="2">${esc(q&&q.note||"")}</textarea></label></div>
+  <div class="save-row" style="margin-top:12px"><span class="note" id="rMsg">${""}</span><button class="btn primary" type="submit">${q&&q.status==="pending"?"บันทึกการแก้ไขคำขอ":"ส่งคำขอสิทธิ์"}</button></div></form>`;
+  $("#regForm").onsubmit=async e=>{e.preventDefault();const ds=[...document.querySelectorAll(".rDept")].filter(c=>c.checked).map(c=>c.value);if(!ds.length){$("#rMsg").textContent="เลือกกลุ่มงานอย่างน้อย 1 กลุ่ม";return}
+    try{await S.db.doc("requests/"+S.myId).set({uid:S.myId,depts:ds,position:$("#rPos").value.trim(),phone:$("#rTel").value.trim(),note:$("#rNote").value.trim(),status:"pending",requestedAt:new Date().toISOString()});toast("ส่งคำขอแล้ว")}
+    catch(err){$("#rMsg").textContent="ส่งคำขอไม่สำเร็จ ลองเข้าสู่ระบบใหม่"}}}
+function bindEntryTop(){const p=$("#ePer");if(p)p.onchange=e=>{if(S.entryDirty&&!confirmLeave())return(e.target.value=S.period);changePeriod(e.target.value)};
+  const m=$("#mineOnly");if(m)m.onchange=e=>{S.entryMineOnly=e.target.checked;S.entrySel=null;S.entryDirty=false;render()}}
+function confirmLeave(){toast("มีข้อมูลที่ยังไม่บันทึก กด “บันทึก” หรือ “ยกเลิกการแก้ไข” ก่อน");return false}
+function refreshEntryList(){const box=$("#mineList");if(!box)return;const list=entryList();
+  box.innerHTML=list.map(k=>{const areas=entryAreas(k),affs=entryAffs(k);let done=0;withCtx("moph",()=>{for(const f of affs)for(const a of areas)if(hasData(k,recOf(k,a,f)))done++});const tot=areas.length*affs.length;
+    return `<button data-sel="${esc(k.id)}" aria-current="${k.id===S.entrySel}"><span class="t"><span class="code">${esc(k.code)}</span>${esc(k.name)}${k.hdc&&k.hdc.on?' <span class="tchip src">HDC</span>':""}</span><span class="chip ${done===tot?"s-pass":done?"s-near":"s-pending"} num">${done}/${tot}</span></button>`}).join("");
+  box.querySelectorAll("[data-sel]").forEach(b=>b.onclick=()=>{if(S.entryDirty)return confirmLeave();S.entrySel=b.dataset.sel;refreshEntryList();renderEntryForm()})}
+function inputCells(k,area,r,dis){r=r||{};const d=dis?" disabled":"";const n=(nm,val,lbl)=>`<td><input type="number" step="any" inputmode="decimal" id="in-${area}-${nm}" data-area="${area}" data-f="${nm}" value="${esc(val??"")}" aria-label="${esc(areaName(area))} ${esc(lbl)}"${d}></td>`;
+  const p=r.p||[];switch(k.formula){
+  case "percent":case "rate":case "ratio":return n("a",r.a,"A")+n("b",r.b,"B");
+  case "count":return n("a",r.a,"A");
+  case "change_prev":return n("a",r.a,"ปีนี้")+n("p0",p[0],"ปีก่อน");
+  case "change_avg":return n("a",r.a,"ปีนี้")+Array.from({length:k.years||3},(_,i)=>n("p"+i,p[i],`ย้อนหลังปีที่ ${i+1}`)).join("");
+  case "manual":return n("value",r.value,"ผลลัพธ์");
+  case "qualitative":return `<td><select id="in-${area}-pass" data-area="${area}" data-f="pass" aria-label="${esc(areaName(area))} ผลการประเมิน"${d}><option value="">—</option><option value="1" ${r.pass===true?"selected":""}>ผ่าน</option><option value="0" ${r.pass===false?"selected":""}>ไม่ผ่าน</option></select></td>`}}
+function inputHeads(k){const y=S.settings.year||2570;switch(k.formula){
+  case "percent":case "rate":case "ratio":return `<th>A ${esc(k.aLabel||"ผลงาน")}</th><th>B ${esc(k.bLabel||"เป้าหมาย/ประชากร")}</th>`;
+  case "count":return `<th>A ${esc(k.aLabel||"จำนวน")}</th>`;
+  case "change_prev":return `<th>ปี ${y}</th><th>ปี ${y-1}</th>`;
+  case "change_avg":return `<th>ปี ${y}</th>`+Array.from({length:k.years||3},(_,i)=>`<th>ปี ${y-1-i}</th>`).join("");
+  case "manual":return `<th>ค่าผลลัพธ์</th>`;
+  case "qualitative":return `<th>ผลการประเมิน</th>`}}
+function numFields(k){switch(k.formula){case "percent":case "rate":case "ratio":return ["a","b"];case "count":return ["a"];case "change_prev":return ["a","p0"];case "change_avg":return ["a",...Array.from({length:k.years||3},(_,i)=>"p"+i)];case "manual":return ["value"];default:return ["pass"]}}
+function readRow(k,area){const el=f=>document.getElementById(`in-${area}-${f}`);const g=f=>{const e=el(f);return e?e.value:""};
+  const r={forcePass:!!(el("force")&&el("force").checked),src:el("src")?el("src").value:"manual"};
+  if(r.src==="hdc")return r;
+  r.asOf=g("asof")||($("#eAsOf")&&$("#eAsOf").value)||"";
+  if(k.formula==="qualitative"){const v=g("pass");r.pass=v===""?null:v==="1";return r}
+  if(k.formula==="manual"){r.value=num(g("value"));return r}
+  r.a=num(g("a"));if(["percent","rate","ratio"].includes(k.formula))r.b=num(g("b"));
+  if(k.formula==="change_prev")r.p=[num(g("p0"))];if(k.formula==="change_avg")r.p=Array.from({length:k.years||3},(_,i)=>num(g("p"+i)));return r}
+function fillRow(k,area,r,dis){r=r||{};const p=r.p||[];for(const f of numFields(k)){const e=document.getElementById(`in-${area}-${f}`);if(!e)continue;
+  const v=f==="pass"?(r.pass===true?"1":r.pass===false?"0":""):f[0]==="p"&&f!=="pass"?p[+f.slice(1)]:r[f];e.value=v??"";e.disabled=!!dis}}
+function renderEntryForm(){const pane=$("#entryPane");if(!pane)return;const k=S.byId[S.entrySel];if(!k){pane.innerHTML="";return}S.entryDirty=false;
+  const affs=entryAffs(k);if(!affs.includes(S.entryAff))S.entryAff="moph";const aff=S.entryAff;
+  const areas=entryAreas(k);const canSave=S.canWrite!==false&&canEnter(k);const hdcOn=!!(k.hdc&&k.hdc.on);
+  const rec=a=>S.results[resKey(k.id,a,S.period,aff)],hd=a=>S.hdc[resKey(k.id,a,S.period,aff)];const srcOf=a=>{const r=rec(a);return (r&&r.src)||(hd(a)?"hdc":(hdcOn?k.defaultSrc||"manual":"manual"))};
+  const crit=withCtx(aff,()=>critText(k));const per=curPeriod();
+  pane.innerHTML=`<form id="entryForm" novalidate><div class="meta"><span class="exdot" style="--c:${excOf(k.exc).c}"></span>${esc(excOf(k.exc).name)} · ${k.level==="district"?"ระดับอำเภอ":"ระดับจังหวัด"}${k.dept?" · "+esc(k.dept):""}</div>
+    <h2 style="font-size:19px;margin:2px 0 8px"><span class="code">${esc(k.code)}</span>${esc(k.name)}</h2>
+    <dl class="dl" style="margin-bottom:12px"><dt>สูตร</dt><dd>${esc(FORMULAS[k.formula]?.f(k)||"")}${k.aLabel?`<div class="meta">A = ${esc(k.aLabel)}</div>`:""}${k.bLabel?`<div class="meta">B = ${esc(k.bLabel)}</div>`:""}</dd><dt>เกณฑ์</dt><dd>${crit}</dd><dt>รอบรายงาน</dt><dd>${esc(periodName())}${per.start?` (ผลงาน ${esc(fmtDay(per.start))} – ${esc(fmtDay(per.end))})`:""}</dd></dl>
+    ${affs.length>1?`<div class="subtabs" style="margin-bottom:10px">${affs.map(x=>`<button type="button" data-eaff="${x}" aria-current="${x===aff}">${esc(affName(x))}</button>`).join("")}</div>`:`<p class="note" style="margin:0 0 8px">ตัวชี้วัดนี้บันทึกรวมทุกหน่วยบริการ ไม่แยกสังกัด</p>`}
+    <div class="bar" style="margin-bottom:8px"><label>ข้อมูล ณ วันที่ (ใช้กับแถวที่ไม่ได้ระบุ)<input type="date" id="eAsOf" value="${todayISO()}"></label>
+      ${hdcOn?`<button type="button" class="btn small" id="allHdc">ใช้ข้อมูล HDC ทุกแถว</button><button type="button" class="btn small" id="allMan">บันทึกเองทุกแถว</button>`:""}</div>
+    <div class="scroll"><table class="etable"><thead><tr><th>พื้นที่</th>${hdcOn?"<th>ที่มาข้อมูล</th>":""}${inputHeads(k)}<th>ข้อมูล ณ วันที่</th><th>ผลลัพธ์</th><th>สถานะ / ระยะห่างจากเกณฑ์</th><th title="ใช้เมื่อผลคำนวณไม่สะท้อนความจริง เช่น ไม่มีการตาย ต้องระบุเหตุผลในหมายเหตุ">ถือว่าผ่าน</th><th>หมายเหตุ</th></tr></thead><tbody>
+    ${areas.map(a=>{const r=rec(a),h=hd(a),src=srcOf(a),isH=src==="hdc";const shown=isH?h:r;
+      return `<tr data-row="${a}"><td>${esc(areaName(a))}${r&&r.updatedBy?`<div class="meta" data-uid="${esc(r.updatedBy)}">บันทึกโดย <span class="pn">…</span><br>${esc(fmtStamp(r.updatedAt))}</div>`:""}${h?`<div class="meta">HDC นำเข้า ${esc(fmtStamp(h.importedAt))}</div>`:""}</td>
+      ${hdcOn?`<td><select id="in-${a}-src" data-area="${a}" aria-label="ที่มาข้อมูล ${esc(areaName(a))}"><option value="manual" ${!isH?"selected":""}>บันทึกเอง</option><option value="hdc" ${isH?"selected":""}>HDC${h?"":" (ยังไม่มีข้อมูล)"}</option></select></td>`:""}
+      ${inputCells(k,a,shown,isH)}<td><input type="date" id="in-${a}-asof" data-area="${a}" value="${esc((shown&&shown.asOf)||"")}" ${isH?"disabled":""} aria-label="ข้อมูล ณ วันที่ ${esc(areaName(a))}"></td>
+      <td class="num" data-out="${a}"></td><td data-st="${a}"></td><td style="text-align:center"><input type="checkbox" id="in-${a}-force" data-area="${a}" ${r&&r.forcePass?"checked":""} aria-label="ถือว่าผ่าน ${esc(areaName(a))}"></td><td><input type="text" id="in-${a}-note" data-area="${a}" value="${esc(r&&r.note||"")}" aria-label="หมายเหตุ ${esc(areaName(a))}"></td></tr>`}).join("")}
+    ${k.level==="district"&&(k.agg||"pooled")==="pooled"?`<tr><td><b>ภาพรวมจังหวัด</b><div class="meta">คำนวณจากผลรวมอำเภอ</div></td><td colspan="${inputHeads(k).split("<th").length-1+(hdcOn?1:0)+1}"></td><td class="num" data-out="P"></td><td data-st="P"></td><td></td><td></td></tr>`:""}
+    </tbody></table></div>
+    <p class="note" style="margin:8px 0 0">วันเวลาที่บันทึกและผู้บันทึกระบบเก็บให้อัตโนมัติ · ช่อง “ข้อมูล ณ วันที่” คือวันที่ของข้อมูลผลงาน เช่น วันที่ดึงรายงาน · ติ๊ก “ถือว่าผ่าน” ได้เมื่อผลคำนวณไม่สะท้อนความจริง เช่น ไม่มีการตาย ต้องระบุเหตุผลในหมายเหตุ และควรกรอก A, B ที่มี (เช่น A = 0)</p>
+    <div class="save-row" style="margin-top:12px"><span class="note" id="saveNote">${canSave?"":"บัญชีนี้ไม่มีสิทธิ์บันทึกตัวชี้วัดนี้"}</span><button type="button" class="btn" id="cancelEdit">ยกเลิกการแก้ไข</button><button type="submit" class="btn primary" ${canSave?"":"disabled"}>บันทึก</button></div></form>`;
+  const form=$("#entryForm");
+  const recalc=()=>{const tmp=Object.assign({},S.results);for(const a of areas)tmp[resKey(k.id,a,S.period,aff)]=readRow(k,a);const orig=S.results;S.results=tmp;
+    withCtx(aff,()=>{const outAreas=[...areas];if(k.level==="district"&&(k.agg||"pooled")==="pooled")outAreas.push("P");
+      for(const a of outAreas){const ev=evalLeaf(k,a);const o=pane.querySelector(`[data-out="${a}"]`);if(o)o.textContent=ev.value!=null?fmtValue(k,ev.value):"—";const s=pane.querySelector(`[data-st="${a}"]`);if(s)s.innerHTML=chip(ev.status)+gapHtml(k,ev)}});S.results=orig};
+  const setSrc=(a,src)=>{const sel=document.getElementById(`in-${a}-src`);if(sel)sel.value=src;const isH=src==="hdc";const h=hd(a),r=rec(a);
+    fillRow(k,a,isH?h:(r&&r.src!=="hdc"?r:{}),isH);const d=document.getElementById(`in-${a}-asof`);if(d){d.value=isH?(h&&h.asOf||""):(r&&r.src!=="hdc"&&r.asOf||"");d.disabled=isH}};
+  pane.querySelectorAll("[id$='-src']").forEach(sel=>sel.addEventListener("change",()=>setSrc(sel.dataset.area,sel.value)));
+  if(hdcOn){$("#allHdc").onclick=()=>{areas.forEach(a=>setSrc(a,"hdc"));S.entryDirty=true;recalc()};$("#allMan").onclick=()=>{areas.forEach(a=>setSrc(a,"manual"));S.entryDirty=true;recalc()}}
+  pane.querySelectorAll("[data-eaff]").forEach(b=>b.onclick=()=>{if(S.entryDirty)return confirmLeave();S.entryAff=b.dataset.eaff;renderEntryForm()});
+  recalc();form.addEventListener("input",()=>{S.entryDirty=true;recalc()});form.addEventListener("change",()=>{S.entryDirty=true;recalc()});
+  $("#cancelEdit").onclick=()=>{S.entryDirty=false;renderEntryForm();refreshEntryList()};
+  form.onsubmit=async e=>{e.preventDefault();if(!S.db)return;const note=a=>(document.getElementById(`in-${a}-note`)||{}).value||"";
+    const miss=areas.filter(a=>{const f=document.getElementById(`in-${a}-force`);return f&&f.checked&&!note(a).trim()});
+    const noDate=areas.filter(a=>{const r=readRow(k,a);return r.src!=="hdc"&&hasNum(k,r)&&!r.asOf});
+    areas.forEach(a=>{const n=document.getElementById(`in-${a}-note`);if(n)n.style.borderColor=miss.includes(a)?"var(--fail)":""});
+    if(miss.length){$("#saveNote").textContent=`ระบุเหตุผลในหมายเหตุของพื้นที่ที่ติ๊ก “ถือว่าผ่าน”: ${miss.map(areaName).join(", ")}`;document.getElementById(`in-${miss[0]}-note`).focus();return}
+    if(noDate.length){$("#saveNote").textContent=`ระบุ “ข้อมูล ณ วันที่”: ${noDate.map(areaName).join(", ")}`;return}
+    const btn=form.querySelector("[type=submit]");btn.disabled=true;$("#saveNote").textContent="กำลังบันทึก…";let n=0;
+    try{for(const a of areas){const r=readRow(k,a);const nt=note(a);const key=resKey(k.id,a,S.period,aff);const old=S.results[key]||{};
+      const sig=x=>JSON.stringify([x.src||"manual",x.a??null,x.b??null,x.p||null,x.value??null,x.pass??null,x.note||"",!!x.forcePass,x.asOf||""]);
+      if(sig({...r,note:nt})===sig({...old,src:old.src||k.defaultSrc||"manual"}))continue;
+      const empty=r.src!=="hdc"&&!hasData(k,r)&&!nt;
+      if(empty&&S.results[key]){await S.db.doc("results/"+key).delete();n++;continue}if(empty)continue;
+      const body={kpi:k.id,area:a,period:S.period,aff,year:S.settings.year||2570,...r,note:nt,updatedBy:S.myId,updatedAt:new Date().toISOString()};
+      if(r.src==="hdc"){delete body.asOf}
+      await S.db.doc("results/"+key).set(body);n++}
+      S.entryDirty=false;toast(n?`บันทึกแล้ว ${n} พื้นที่`:"ไม่มีข้อมูลที่เปลี่ยนแปลง");renderEntryForm();refreshEntryList()}
+    catch(err){btn.disabled=false;$("#saveNote").textContent=err&&err.code==="invalid_argument"?"บันทึกไม่ได้: บัญชีนี้ไม่มีสิทธิ์บันทึกตัวชี้วัดนี้ ติดต่อผู้ดูแลระบบ":"บันทึกไม่สำเร็จ ลองอีกครั้ง";}};
+  paintPeople(pane)}
+function fmtStamp(iso){if(!iso)return "";const d=new Date(iso);if(isNaN(d))return "";return d.toLocaleString("th-TH",{day:"numeric",month:"short",year:"2-digit",hour:"2-digit",minute:"2-digit"}).replace(/[๐-๙]/g,c=>"๐๑๒๓๔๕๖๗๘๙".indexOf(c))+" น."}
+
+/* ================= RENDER: ADMIN ================= */
+function renderAdmin(){const app=$("#app");const pend=Object.values(S.requests).filter(q=>q.status==="pending"&&!(S.members[q.uid]&&S.members[q.uid].status==="approved")).length;
+  app.innerHTML=`<div class="bar"><h1 style="font-size:22px;margin-right:auto">ผู้ดูแลระบบ</h1>${exportMenu("admin")}</div>
+    <div class="subtabs" role="tablist"><button data-at="kpis" aria-current="${S.adminTab==="kpis"}">ตัวชี้วัด</button><button data-at="people" aria-current="${S.adminTab==="people"}">ผู้ใช้งานและสิทธิ์${pend?` <span class="chip s-near">${pend}</span>`:""}</button><button data-at="hdc" aria-current="${S.adminTab==="hdc"}">ข้อมูล HDC</button><button data-at="settings" aria-current="${S.adminTab==="settings"}">ตั้งค่า</button><button data-at="audit" aria-current="${S.adminTab==="audit"}">ประวัติและสำรองข้อมูล</button></div>
+    <div id="adminBody"></div>`;
+  app.querySelectorAll("[data-at]").forEach(b=>b.onclick=()=>{S.adminTab=b.dataset.at;renderAdmin()});
+  const body=$("#adminBody");
+  if(S.adminTab==="settings")return adminSettings(body);
+  if(S.adminTab==="people")return adminPeople(body);
+  if(S.adminTab==="hdc")return adminHdc(body);
+  if(S.adminTab==="audit")return adminAudit(body);
+  body.innerHTML=`<div class="panel"><div class="bar" style="margin-bottom:10px"><span class="note" style="margin-right:auto">${S.kpis.length} รายการ (ตัวหลัก ${topItems().length} · ตัวย่อย ${S.kpis.length-topItems().length})</span><button class="btn primary" id="addK">เพิ่มตัวชี้วัด</button></div>
+    <div class="scroll"><table class="list"><thead><tr><th>ตัวชี้วัด</th><th>สูตร</th><th>เกณฑ์</th><th>ระดับ</th><th>สังกัด / HDC</th><th>ผู้รับผิดชอบ</th><th></th></tr></thead><tbody>
+    ${S.kpis.map(k=>{const sub=k.parent&&S.byId[k.parent];const kids=kidsOf(k).length;return `<tr class="${sub?"sub":""}"><td><span class="exdot" style="--c:${excOf(k.exc).c}"></span><span class="code">${esc(k.code)}</span>${esc(k.name)}${kids?`<div class="meta">ตัวย่อย ${kids} · ${esc({all:"ต้องผ่านทุกตัว",own:"ใช้ผลตัวหลัก",min:"ผ่านอย่างน้อย "+(k.minPass||1)+" ตัว"}[k.rule||"all"])} · ${esc({main:"นับตัวหลัก",both:"นับรวมตัวย่อย",subs:"นับเฉพาะตัวย่อย"}[k.countMode||"main"])}</div>`:""}<div class="meta">${esc(k.dept||"")}</div></td>
+      <td class="meta">${hasOwn(k)?esc(FORMULAS[k.formula]?.t||""):"จากตัวย่อย"}<div>${typeLabels(k).map(t=>`<span class="tchip">${esc(t)}</span>`).join(" ")}</div></td><td>${hasOwn(k)?critText(k):"—"}</td><td class="meta">${k.level==="district"?`อำเภอ ${inclDistricts(k).length}`:"จังหวัด"}</td>
+      <td class="meta">${hasOwn(k)?(k.affSplit?"แยกสังกัด":"รวม"):"—"}${k.hdc&&k.hdc.on?' <span class="tchip src">HDC</span>':""}</td>
+      <td><div class="people">${(k.owners||[]).map(id=>personChip(id)).join("")||'<span class="meta">ตามกลุ่มงาน</span>'}</div></td><td><button class="btn small" data-edit="${esc(k.id)}">แก้ไข</button></td></tr>`}).join("")}
+    </tbody></table></div></div>`;
+  $("#addK").onclick=()=>editKpi(null);body.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editKpi(b.dataset.edit));paintPeople(body)}
+
+function deptChecks(cls,sel){return (S.settings.depts||DEPTS).map(d=>`<label><input type="checkbox" class="${cls}" value="${esc(d)}" ${sel.includes(d)?"checked":""}> ${esc(d.replace("กลุ่มงาน",""))}</label>`).join("")}
+function adminPeople(body){const reqs=Object.values(S.requests).filter(q=>q.status==="pending"&&!(S.members[q.uid]&&S.members[q.uid].status==="approved"));const mem=Object.entries(S.members);
+  const kpiCount=depts=>S.kpis.filter(k=>hasOwn(k)&&((depts||[]).includes(k.dept)||(k.parent&&S.byId[k.parent]&&(depts||[]).includes(S.byId[k.parent].dept)))).length;
+  body.innerHTML=`<div class="panel"><h2>คำขอรอการอนุมัติ<small>${reqs.length} รายการ</small></h2>
+    ${reqs.length?`<div class="scroll"><table class="list"><thead><tr><th>ผู้ขอ</th><th>กลุ่มงานที่ให้สิทธิ์</th><th>ข้อมูลประกอบ</th><th></th></tr></thead><tbody>${reqs.map(q=>`<tr data-req="${esc(q.uid)}"><td>${personChip(q.uid)}<div class="meta">${esc(fmtStamp(q.requestedAt))}</div></td>
+      <td><div class="checks" style="font-size:13px">${deptChecks("aDept",q.depts||[])}</div></td><td class="meta">${esc(q.position||"")}${q.phone?"<br>โทร "+esc(q.phone):""}${q.note?"<br>"+esc(q.note):""}</td>
+      <td style="white-space:nowrap"><button class="btn small primary" data-approve="${esc(q.uid)}">อนุมัติ</button> <button class="btn small danger" data-reject="${esc(q.uid)}">ไม่อนุมัติ</button></td></tr>`).join("")}</tbody></table></div>`:'<p class="meta">ไม่มีคำขอใหม่</p>'}</div>
+  <div class="panel" style="margin-top:16px"><h2>ผู้มีสิทธิ์บันทึกผล<small>${mem.filter(([,m])=>m.status==="approved").length} คน</small></h2>
+    <div class="scroll"><table class="list"><thead><tr><th>ผู้ใช้</th><th>กลุ่มงานที่บันทึกได้</th><th>สถานะ</th><th></th></tr></thead><tbody>${mem.length?mem.map(([id,m])=>`<tr data-mem="${esc(id)}"><td>${personChip(id)}<div class="meta">อนุมัติ ${esc(fmtStamp(m.approvedAt))}</div></td>
+      <td><div class="checks" style="font-size:13px">${deptChecks("mDept",m.depts||[])}</div><div class="meta">บันทึกได้ ${kpiCount(m.depts)} ตัวชี้วัด</div></td><td>${m.status==="approved"?'<span class="chip s-pass">ใช้งาน</span>':'<span class="chip s-fail">ระงับ</span>'}</td>
+      <td style="white-space:nowrap"><button class="btn small" data-msave="${esc(id)}">บันทึกกลุ่มงาน</button> ${m.status==="approved"?`<button class="btn small danger" data-mrev="${esc(id)}">ระงับสิทธิ์</button>`:`<button class="btn small" data-mres="${esc(id)}">คืนสิทธิ์</button>`}</td></tr>`).join(""):'<tr><td colspan="4" class="meta">ยังไม่มีผู้ได้รับสิทธิ์</td></tr>'}</tbody></table></div></div>
+  <div class="panel" style="margin-top:16px"><h2>เพิ่มผู้มีสิทธิ์โดยตรง</h2><div class="form"><div class="f full"><span>ค้นหาผู้ใช้ในองค์กร</span><input type="search" id="pQ" placeholder="พิมพ์ชื่อหรืออีเมล" autocomplete="off"><div id="pHits"></div><div class="people" id="pSel"></div></div>
+    <div class="f full"><span>กลุ่มงานที่ให้สิทธิ์</span><div class="checks">${deptChecks("pDept",[])}</div></div></div><div class="save-row" style="margin-top:10px"><button class="btn primary" id="pAdd">ให้สิทธิ์</button></div></div>
+  <div class="panel" style="margin-top:16px"><p class="note" style="margin:0">ผู้มีสิทธิ์บันทึกผลจะบันทึกได้เฉพาะตัวชี้วัดของกลุ่มงานที่ได้รับสิทธิ์ และตัวที่ระบุชื่อเป็นผู้รับผิดชอบในหน้าแก้ไขตัวชี้วัด เซิร์ฟเวอร์ตรวจสิทธิ์นี้ทุกครั้งที่บันทึก ผู้ดูแลระบบกำหนดได้ในส่วน “บัญชีผู้ใช้” ด้านล่าง</p></div>
+  <div class="panel" style="margin-top:16px" id="acctPanel"><h2>บัญชีผู้ใช้</h2><div id="acctBody" class="meta">กำลังโหลด…</div></div>`;
+  const now=()=>new Date().toISOString();
+  const checked=(root,cls)=>[...root.querySelectorAll("."+cls)].filter(c=>c.checked).map(c=>c.value);
+  body.querySelectorAll("[data-approve]").forEach(b=>b.onclick=async()=>{const id=b.dataset.approve;const ds=checked(b.closest("tr"),"aDept");if(!ds.length){toast("เลือกกลุ่มงานอย่างน้อย 1 กลุ่ม");return}
+    try{await S.db.doc("members/"+id).set({status:"approved",depts:ds,approvedBy:S.myId,approvedAt:now()});await S.db.doc("requests/"+id).update({status:"approved",decidedBy:S.myId,decidedAt:now()});toast("อนุมัติแล้ว")}catch(e){toast("อนุมัติไม่สำเร็จ")}});
+  body.querySelectorAll("[data-reject]").forEach(b=>b.onclick=async()=>{const id=b.dataset.reject;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="ยืนยันไม่อนุมัติ";return}
+    try{await S.db.doc("requests/"+id).update({status:"rejected",decidedBy:S.myId,decidedAt:now()});toast("บันทึกแล้ว")}catch(e){toast("บันทึกไม่สำเร็จ")}});
+  body.querySelectorAll("[data-msave]").forEach(b=>b.onclick=async()=>{const id=b.dataset.msave;try{await S.db.doc("members/"+id).update({depts:checked(b.closest("tr"),"mDept"),updatedBy:S.myId,updatedAt:now()});toast("บันทึกกลุ่มงานแล้ว")}catch(e){toast("บันทึกไม่สำเร็จ")}});
+  body.querySelectorAll("[data-mrev]").forEach(b=>b.onclick=async()=>{if(!b.dataset.armed){b.dataset.armed="1";b.textContent="ยืนยันระงับ";return}try{await S.db.doc("members/"+b.dataset.mrev).update({status:"revoked",updatedBy:S.myId,updatedAt:now()});toast("ระงับสิทธิ์แล้ว")}catch(e){toast("ไม่สำเร็จ")}});
+  body.querySelectorAll("[data-mres]").forEach(b=>b.onclick=async()=>{try{await S.db.doc("members/"+b.dataset.mres).update({status:"approved",updatedBy:S.myId,updatedAt:now()});toast("คืนสิทธิ์แล้ว")}catch(e){toast("ไม่สำเร็จ")}});
+  const picked=new Set();const drawSel=()=>{$("#pSel").innerHTML=[...picked].map(id=>personChip(id,true)).join("");$("#pSel").querySelectorAll("[data-rm]").forEach(x=>x.onclick=()=>{picked.delete(x.dataset.rm);drawSel()});paintPeople($("#pSel"))};
+  const q=$("#pQ");const search=async()=>{if(!S.user)return;const hits=(await S.user.search(q.value.trim())).filter(h=>!picked.has(h.id));const box=$("#pHits");
+    box.innerHTML=hits.length?`<div class="hits">${hits.map(h=>`<button type="button" data-add="${esc(h.id)}"><img alt="" src="${esc(h.avatarUrl)}"><span></span></button>`).join("")}</div>`:"";
+    box.querySelectorAll("[data-add]").forEach((x,i)=>{x.querySelector("span").textContent=hits[i].name;x.onclick=()=>{picked.add(x.dataset.add);q.value="";box.innerHTML="";drawSel()}})};
+  q.addEventListener("focus",search);q.addEventListener("input",search);
+  $("#pAdd").onclick=async()=>{const ds=checked(body,"pDept");if(!picked.size||!ds.length){toast("เลือกผู้ใช้และกลุ่มงาน");return}
+    try{for(const id of picked)await S.db.doc("members/"+id).set({status:"approved",depts:ds,approvedBy:S.myId,approvedAt:now()});toast("ให้สิทธิ์แล้ว")}catch(e){toast("ไม่สำเร็จ")}};
+  paintPeople(body);drawAccounts()}
+
+function adminSettings(body){const st=S.settings;body.innerHTML=`<form class="panel" id="setForm"><div class="form">
+  <label class="f"><span>ปีงบประมาณ</span><input type="number" id="sYear" value="${esc(st.year)}"></label>
+  <label class="f"><span>รอบรายงานที่แสดงเป็นค่าเริ่มต้น</span><select id="sCur">${st.periods.map(p=>`<option value="${esc(p.id)}" ${p.id===st.currentPeriod?"selected":""}>${esc(p.name)}</option>`).join("")}</select></label>
+  <fieldset class="f full"><legend>รอบรายงาน</legend><div class="scroll"><table class="etable"><thead><tr><th>ชื่อรอบ</th><th>ผลงานตั้งแต่</th><th>ถึง</th><th>วันที่ตัดข้อมูล (ข้อมูล ณ วันที่)</th></tr></thead><tbody>
+    ${st.periods.map((p,i)=>`<tr><td><input type="text" id="sP${i}" value="${esc(p.name)}"></td><td><input type="date" id="sS${i}" value="${esc(p.start||"")}"></td><td><input type="date" id="sE${i}" value="${esc(p.end||"")}"></td><td><input type="date" id="sA${i}" value="${esc(p.asOf||"")}"></td></tr>`).join("")}</tbody></table></div>
+    <span class="help">ถ้าระบุวันที่ตัดข้อมูล แดชบอร์ดจะแสดง “ข้อมูล ณ วันที่” ตามนี้ ถ้าเว้นว่างจะใช้วันที่ล่าสุดของข้อมูลที่บันทึก</span></fieldset>
+  <fieldset class="f full"><legend>ประเภทตัวชี้วัด</legend><div id="typeRows" style="display:flex;flex-direction:column;gap:6px"></div>
+  <div class="bar" style="margin-top:8px"><input type="text" id="newType" placeholder="ชื่อประเภทใหม่ เช่น ตัวชี้วัดเขต"><button type="button" class="btn small" id="addType">เพิ่มประเภท</button></div>
+  <span class="help">ลบประเภทแล้ว ตัวชี้วัดที่เคยติดประเภทนั้นจะไม่แสดงประเภทนั้นอีก</span></fieldset>
+  <label class="f full"><span>กลุ่มงาน (บรรทัดละ 1 กลุ่ม)</span><textarea id="sDepts" rows="6">${esc((st.depts||DEPTS).join("\n"))}</textarea><span class="help">ใช้ในการลงทะเบียนและการให้สิทธิ์ แก้ชื่อกลุ่มงานแล้วต้องแก้กลุ่มงานในตัวชี้วัดและสิทธิ์ผู้ใช้ให้ตรงด้วย</span></label>
+  <label class="f full"><span>หน่วยบริการนอกสังกัด สป.สธ. (บรรทัดละ 1 แห่ง: รหัสหน่วยบริการ ชื่อ)</span><textarea id="sOther" rows="5" placeholder="เช่น 12345 รพ.สต.บ้าน… (ถ่ายโอน อบจ.)">${esc((st.otherHosp||[]).map(h=>h.code+" "+h.name).join("\n"))}</textarea><span class="help">ใช้แยกข้อมูลที่นำเข้าจาก HDC ตามรหัสหน่วยบริการ แถวที่รหัสอยู่ในรายการนี้จะนับเป็นนอกสังกัด สป.สธ.</span></label>
+  </div><div class="save-row" style="margin-top:14px"><button class="btn primary" type="submit">บันทึกการตั้งค่า</button></div></form>`;
+  let types=(st.types||[]).map(t=>({...t}));const used=id=>S.kpis.filter(k=>(k.types||[]).includes(id)).length;
+  const drawTypes=()=>{$("#typeRows").innerHTML=types.map((t,i)=>`<div class="bar"><input type="text" data-ti="${i}" value="${esc(t.name)}" aria-label="ชื่อประเภท"><span class="meta">ใช้กับ ${used(t.id)} ตัวชี้วัด</span><button type="button" class="btn small danger" data-tdel="${i}">ลบ</button></div>`).join("")||'<span class="meta">ยังไม่มีประเภท</span>';
+    $("#typeRows").querySelectorAll("[data-ti]").forEach(x=>x.oninput=()=>{types[+x.dataset.ti].name=x.value});
+    $("#typeRows").querySelectorAll("[data-tdel]").forEach(x=>x.onclick=()=>{types.splice(+x.dataset.tdel,1);drawTypes()})};drawTypes();
+  $("#addType").onclick=()=>{const n=$("#newType").value.trim();if(!n)return;types.push({id:"t"+Date.now().toString(36),name:n});$("#newType").value="";drawTypes()};
+  $("#setForm").onsubmit=async e=>{e.preventDefault();
+    const s={year:num($("#sYear").value)||2570,periods:st.periods.map((p,i)=>({id:p.id,name:$("#sP"+i).value.trim()||p.name,start:$("#sS"+i).value,end:$("#sE"+i).value,asOf:$("#sA"+i).value})),currentPeriod:$("#sCur").value,
+      types:types.filter(t=>t.name.trim()).map(t=>({id:t.id,name:t.name.trim()})),depts:$("#sDepts").value.split("\n").map(x=>x.trim()).filter(Boolean),
+      otherHosp:$("#sOther").value.split("\n").map(x=>x.trim()).filter(Boolean).map(x=>{const m=x.match(/^(\S+)\s*(.*)$/);return {code:m[1],name:m[2]||""}})};
+    try{await S.db.doc("settings/main").set(s);toast("บันทึกการตั้งค่าแล้ว")}catch(err){toast("บันทึกไม่สำเร็จ")}}}
+
+/* ---------- accounts / audit / backup (self-hosted) ---------- */
+async function drawAccounts(){const box=$("#acctBody");if(!box||!window.PLK_HOST)return;let list=[];try{list=await PLK_HOST.accounts()}catch(e){box.textContent="โหลดรายชื่อบัญชีไม่ได้";return}
+  box.innerHTML=`<div class="scroll"><table class="list"><thead><tr><th>ชื่อ</th><th>ชื่อผู้ใช้</th><th>บทบาท</th><th>สถานะ</th><th></th></tr></thead><tbody>${list.map(a=>`<tr data-acc="${esc(a.id)}"><td>${esc(a.name)}<div class="meta">${esc(a.email||"")}</div></td><td class="meta">${esc(a.username)}</td>
+    <td><select data-role="${esc(a.id)}"><option value="user" ${a.role!=="admin"?"selected":""}>ผู้ใช้</option><option value="admin" ${a.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option></select></td>
+    <td>${a.status==="active"?'<span class="chip s-pass">ใช้งาน</span>':'<span class="chip s-fail">ปิดบัญชี</span>'}</td>
+    <td style="white-space:nowrap"><button class="btn small" data-st="${esc(a.id)}" data-v="${a.status==="active"?"disabled":"active"}">${a.status==="active"?"ปิดบัญชี":"เปิดบัญชี"}</button> ${PLK_HOST.mode==="server"?`<button class="btn small" data-pw="${esc(a.id)}">ตั้งรหัสผ่านใหม่</button>`:""}</td></tr>`).join("")}</tbody></table></div>
+    <p class="note">ผู้ดูแลระบบจัดการได้ทุกส่วน ผู้ใช้ทั่วไปบันทึกผลได้หลังได้รับอนุมัติกลุ่มงานด้านบน ต้องมีผู้ดูแลระบบอย่างน้อย 1 คนเสมอ</p>`;
+  const upd=async(id,p,msg)=>{try{await PLK_HOST.updateAccount(id,p);toast(msg);drawAccounts()}catch(e){toast(e.message||"ไม่สำเร็จ");drawAccounts()}};
+  box.querySelectorAll("[data-role]").forEach(s=>s.onchange=()=>upd(s.dataset.role,{role:s.value},"เปลี่ยนบทบาทแล้ว มีผลเมื่อผู้ใช้โหลดหน้าใหม่"));
+  box.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>upd(b.dataset.st,{status:b.dataset.v},"บันทึกแล้ว"));
+  box.querySelectorAll("[data-pw]").forEach(b=>b.onclick=()=>{const tr=b.closest("td");tr.innerHTML=`<input type="text" placeholder="รหัสผ่านใหม่ ≥ 8 ตัว" style="width:150px"> <button class="btn small primary">บันทึก</button>`;const i=tr.querySelector("input");i.focus();tr.querySelector("button").onclick=()=>upd(b.dataset.pw,{password:i.value},"ตั้งรหัสผ่านใหม่แล้ว แจ้งผู้ใช้ให้เปลี่ยนหลังเข้าสู่ระบบ")})}
+async function adminAudit(body){if(!window.PLK_HOST){body.innerHTML='<div class="panel empty">ใช้ได้เมื่อติดตั้งบนเซิร์ฟเวอร์</div>';return}
+  body.innerHTML=`<div class="panel"><h2>สำรองและกู้คืนข้อมูล</h2><p class="note" style="margin-top:0">ไฟล์สำรองเก็บตัวชี้วัด ผลงาน ข้อมูล HDC ผู้ใช้และสิทธิ์ทั้งหมด เก็บไว้ในที่ปลอดภัย เพราะมีข้อมูลบัญชีผู้ใช้</p>
+    <div class="bar"><button class="btn primary" id="bkBtn">ดาวน์โหลดไฟล์สำรอง (.json)</button><label class="btn" style="cursor:pointer">กู้คืนจากไฟล์สำรอง<input type="file" id="rsFile" accept=".json" hidden></label><span class="note" id="bkMsg"></span></div></div>
+    <div class="panel" style="margin-top:16px"><h2>ประวัติการแก้ไขล่าสุด</h2><div id="audBox" class="meta">กำลังโหลด…</div></div>`;
+  $("#bkBtn").onclick=async()=>{try{const d=await PLK_HOST.backup();const blob=new Blob([JSON.stringify(d)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`plk-kpi-backup-${stamp()}.json`;document.body.appendChild(a);a.click();a.remove()}catch(e){toast("สำรองข้อมูลไม่สำเร็จ")}};
+  $("#rsFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;const m=$("#bkMsg");if(!m.dataset.armed){m.dataset.armed="1";m.innerHTML='ข้อมูลปัจจุบันจะถูกแทนที่ทั้งหมด <button class="btn small danger" id="rsGo">ยืนยันกู้คืน</button>';$("#rsGo").onclick=async()=>{try{await PLK_HOST.restore(JSON.parse(await f.text()));m.textContent="กู้คืนแล้ว";setTimeout(()=>location.reload(),800)}catch(x){m.textContent="กู้คืนไม่สำเร็จ: "+(x.message||"")}}}};
+  let rows=[];try{rows=await PLK_HOST.audit(300)}catch(e){}
+  const ids=[...new Set(rows.map(r=>r.by).filter(Boolean))];const ps=S.user?await S.user.profiles(ids):{};
+  const opT={set:"บันทึก",update:"แก้ไข",delete:"ลบ",login:"เข้าสู่ระบบ",register:"สมัครใช้งาน",password:"เปลี่ยนรหัสผ่าน",account:"แก้บัญชี",backup:"สำรองข้อมูล",restore:"กู้คืนข้อมูล"};
+  const what=p=>{const [c,id]=String(p||"").split("/");if(c==="results"||c==="hdc"){const [k,a,per,af]=(id||"").split("~");const K=S.byId[k];return `${c==="hdc"?"HDC ":"ผลงาน "}${K?K.code:k} · ${areaName(a)} · ${(S.settings.periods.find(x=>x.id===per)||{}).name||per||""}${af?" · "+affName(af):""}`}
+    if(c==="kpis"){const K=S.byId[id];return "ตัวชี้วัด "+(K?K.code+" "+K.name.slice(0,40):id)}return {members:"สิทธิ์ผู้ใช้",requests:"คำขอสิทธิ์",settings:"ตั้งค่า",accounts:"บัญชี"}[c]||p};
+  $("#audBox").innerHTML=rows.length?`<div class="scroll" style="max-height:600px"><table class="list"><thead><tr><th>เวลา</th><th>ผู้ใช้</th><th>การทำงาน</th><th>รายการ</th></tr></thead><tbody>${rows.map(r=>`<tr><td class="meta" style="white-space:nowrap">${esc(fmtStamp(r.at))}</td><td>${esc((ps[r.by]&&ps[r.by].name)||r.by||"—")}</td><td>${esc(opT[r.op]||r.op)}</td><td class="meta">${esc(what(r.path))}</td></tr>`).join("")}</tbody></table></div>`:"ยังไม่มีประวัติ"}
+
+/* ---------- HDC import ---------- */
+function matchDistrict(v){const s=String(v??"").trim();if(!s)return null;const m=s.match(/65(0[1-9])/);if(m&&DIST_CODE["65"+m[1]])return DIST_CODE["65"+m[1]];
+  const t=s.replace(/^(อ\.|อำเภอ)\s*/,"");const d=DISTRICTS.find(d=>t.includes(d.name)||(d.name==="เมืองพิษณุโลก"&&/^เมือง/.test(t)));return d?d.id:null}
+function adminHdc(body){const leaves=S.kpis.filter(hasOwn).sort((a,b)=>(b.hdc&&b.hdc.on?1:0)-(a.hdc&&a.hdc.on?1:0));
+  const counts={};for(const [key,h] of Object.entries(S.hdc)){(counts[h.kpi]=counts[h.kpi]||{n:0,at:""}).n++;if((h.importedAt||"")>counts[h.kpi].at)counts[h.kpi].at=h.importedAt}
+  body.innerHTML=`<div class="panel"><h2>นำเข้าข้อมูลจาก HDC</h2>
+    <p class="note" style="margin-top:0">ดาวน์โหลดรายงานจาก HDC เป็น Excel หรือ CSV แล้วนำเข้าที่นี่ ระบบจะรวมผลรายอำเภอและแยกสังกัดให้ ผู้รับผิดชอบเลือกได้ในหน้าบันทึกผลว่าจะใช้ข้อมูล HDC หรือบันทึกเอง</p>
+    <div class="form"><label class="f"><span>ตัวชี้วัด</span><select id="hK">${leaves.map(k=>`<option value="${esc(k.id)}">${esc(k.code)} ${esc(k.name.slice(0,60))}${k.hdc&&k.hdc.on?" · HDC":""}</option>`).join("")}</select></label>
+    <label class="f"><span>รอบรายงาน</span>${periodSelect("hPer")}</label>
+    <label class="f"><span>ข้อมูล ณ วันที่ (วันที่ดึงรายงาน HDC)</span><input type="date" id="hAsOf" value="${todayISO()}"></label>
+    <label class="f"><span>สังกัดของข้อมูลในไฟล์</span><select id="hAff"><option value="byhosp">แยกตามรหัสหน่วยบริการ (ใช้รายการนอกสังกัดในหน้าตั้งค่า)</option><option value="moph">ทั้งไฟล์เป็นในสังกัด สป.สธ.</option><option value="other">ทั้งไฟล์เป็นนอกสังกัด สป.สธ.</option></select></label>
+    <label class="f full"><span>ไฟล์รายงาน HDC (.xlsx, .xls, .csv)</span><input type="file" id="hFile" accept=".xlsx,.xls,.csv"></label></div>
+    <div id="hMap" style="margin-top:12px"></div></div>
+  <div class="panel" style="margin-top:16px"><h2>ข้อมูล HDC ในระบบ<small>${esc(periodName())}</small></h2>
+    ${Object.keys(counts).length?`<table class="list"><thead><tr><th>ตัวชี้วัด</th><th>จำนวนรายการ</th><th>นำเข้าล่าสุด</th><th></th></tr></thead><tbody>${Object.entries(counts).map(([kid,c])=>{const k=S.byId[kid];return `<tr><td>${k?esc(k.code+" "+k.name):esc(kid)}</td><td class="num">${c.n}</td><td class="meta">${esc(fmtStamp(c.at))}</td><td><button class="btn small danger" data-hdel="${esc(kid)}">ลบข้อมูล HDC รอบนี้</button></td></tr>`}).join("")}</tbody></table>`:'<p class="meta">ยังไม่มีข้อมูล HDC ในรอบนี้</p>'}</div>
+  <div class="panel" style="margin-top:16px"><h2>การเชื่อม API ของ HDC อัตโนมัติ</h2><p class="note" style="margin:0">ระบบเก็บข้อมูล HDC แยกจากข้อมูลที่บันทึกเอง จึงรองรับการดึงผ่าน API (HDC Open Data) แบบตั้งเวลาได้ในภายหลัง โดยระบุชื่อรายงาน HDC ของแต่ละตัวชี้วัดในหน้าแก้ไขตัวชี้วัด ทั้งนี้ต้องให้ผู้ดูแลองค์กรเปิดการเข้าถึงโดเมน opendata.moph.go.th ก่อน ระหว่างนี้ใช้การนำเข้าไฟล์ด้านบน</p></div>`;
+  $("#hPer").onchange=e=>{changePeriod(e.target.value)};
+  body.querySelectorAll("[data-hdel]").forEach(b=>b.onclick=async()=>{if(!b.dataset.armed){b.dataset.armed="1";b.textContent="ยืนยันลบ";return}
+    try{for(const [key,h] of Object.entries(S.hdc))if(h.kpi===b.dataset.hdel)await S.db.doc("hdc/"+key).delete();toast("ลบแล้ว")}catch(e){toast("ลบไม่สำเร็จ")}});
+  $("#hFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;$("#hMap").innerHTML='<p class="meta">กำลังอ่านไฟล์…</p>';
+    try{await loadLib("xlsx");const wb=XLSX.read(await f.arrayBuffer(),{type:"array"});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:"",raw:true});hdcMapper(rows,f.name)}
+    catch(err){$("#hMap").innerHTML='<p class="meta">อ่านไฟล์ไม่ได้ ตรวจสอบว่าเป็นไฟล์ Excel หรือ CSV</p>'}}}
+function hdcMapper(rows,fileName){const box=$("#hMap");const k=()=>S.byId[$("#hK").value];
+  let hr=rows.findIndex(r=>r.filter(x=>String(x).trim()!=="").length>=3);if(hr<0)hr=0;
+  const draw=()=>{const K=k();const head=rows[hr]||[];const cols=head.map((h,i)=>`<option value="${i}">${esc(String.fromCharCode(65+(i%26)))}${i>=26?i:""}: ${esc(String(h).slice(0,30))}</option>`).join("");
+    const fields=numFields(K).filter(f=>f!=="pass");const flabel={a:"A "+(K.aLabel||"ผลงาน"),b:"B "+(K.bLabel||"เป้าหมาย"),value:"ค่าผลลัพธ์",p0:"ปีก่อน / ย้อนหลังปีที่ 1"};
+    const guess=re=>{const i=head.findIndex(h=>re.test(String(h)));return i};
+    box.innerHTML=`<div class="form"><label class="f"><span>แถวหัวตาราง</span><input type="number" id="hHr" min="1" value="${hr+1}"></label>
+      <label class="f"><span>คอลัมน์อำเภอ (รหัสหรือชื่อ)</span><select id="hDist">${cols}</select></label>
+      <label class="f"><span>คอลัมน์รหัสหน่วยบริการ (ถ้ามี)</span><select id="hHosp"><option value="">— ไม่มี —</option>${cols}</select></label>
+      ${fields.map(f=>`<label class="f"><span>${esc(flabel[f]||("ย้อนหลังปีที่ "+(+f.slice(1)+1)))}</span><select id="hF-${f}">${cols}</select></label>`).join("")}</div>
+      <div id="hPrev" style="margin-top:10px"></div><div class="save-row" style="margin-top:10px"><span class="note" id="hMsg"></span><button class="btn primary" id="hGo">นำเข้า</button></div>`;
+    const setG=(id,re)=>{const i=guess(re);if(i>=0)$(id).value=String(i)};setG("#hDist",/อำเภอ|amp|distcode|areacode/i);setG("#hHosp",/hospcode|รหัสหน่วย|รหัส\s*รพ/i);
+    if($("#hF-a"))setG("#hF-a",/^(a|result|ผลงาน)$/i);if($("#hF-b"))setG("#hF-b",/^(b|target|เป้าหมาย)$/i);
+    box.querySelectorAll("select,input").forEach(x=>x.addEventListener("change",()=>{if(x.id==="hHr"){hr=Math.max(0,(num(x.value)||1)-1);draw();return}preview()}));preview()};
+  const agg=()=>{const K=k();const fields=numFields(K).filter(f=>f!=="pass");const dc=+$("#hDist").value,hc=$("#hHosp").value===""?null:+$("#hHosp").value;const affMode=$("#hAff").value;
+    const other=new Set((S.settings.otherHosp||[]).map(h=>String(h.code)));const out={};let skipped=0,used=0;
+    for(const r of rows.slice(hr+1)){const d=K.level==="district"?matchDistrict(r[dc]):(String(r[dc]).trim()?"P":null);if(!d){if(r.some(x=>String(x).trim()!==""))skipped++;continue}
+      const aff=affMode==="byhosp"?(hc!=null&&other.has(String(r[hc]).trim())?"other":"moph"):affMode;const key=d+"|"+aff;const o=out[key]=out[key]||{area:d,aff};let any=false;
+      for(const f of fields){const v=num(String(r[+$("#hF-"+f).value]).replace(/,/g,""));if(v==null)continue;any=true;o[f]=(o[f]||0)+v}if(any)used++}
+    if(K.level==="district"&&(K.agg||"pooled")==="manual"){for(const aff of ["moph","other"]){const xs=Object.values(out).filter(o=>o.aff===aff&&o.area!=="P");if(!xs.length)continue;const t={area:"P",aff};for(const f of fields)t[f]=xs.reduce((s,o)=>s+(o[f]||0),0);out["P|"+aff]=t}}
+    if(!K.affSplit)for(const o of Object.values(out))if(o.aff==="other"){const m=out[o.area+"|moph"]=out[o.area+"|moph"]||{area:o.area,aff:"moph"};for(const f of fields)m[f]=(m[f]||0)+(o[f]||0);delete out[o.area+"|other"]}
+    return {out,skipped,used,fields}};
+  const preview=()=>{const {out,skipped,used,fields}=agg();const list=Object.values(out).sort((a,b)=>a.area.localeCompare(b.area)||a.aff.localeCompare(b.aff));
+    $("#hPrev").innerHTML=`<p class="meta">ใช้ ${used} แถว · ข้ามแถวที่ระบุอำเภอไม่ได้ ${skipped} แถว</p><div class="scroll"><table class="etable"><thead><tr><th>พื้นที่</th><th>สังกัด</th>${fields.map(f=>`<th>${esc(f==="a"?"A":f==="b"?"B":f==="value"?"ผลลัพธ์":"ย้อนหลังปีที่ "+(+f.slice(1)+1))}</th>`).join("")}</tr></thead><tbody>${list.map(o=>`<tr><td>${esc(areaName(o.area))}</td><td>${esc(affName(o.aff))}</td>${fields.map(f=>`<td class="num">${fmtN(o[f],0)}</td>`).join("")}</tr>`).join("")||'<tr><td colspan="9" class="meta">ไม่มีข้อมูลที่จับคู่อำเภอได้</td></tr>'}</tbody></table></div>`};
+  draw();
+  box.onclick=async e=>{if(e.target.id!=="hGo")return;const K=k();const per=$("#hPer").value,asOf=$("#hAsOf").value;if(!asOf){$("#hMsg").textContent="ระบุข้อมูล ณ วันที่";return}
+    const {out}=agg();const list=Object.values(out);if(!list.length){$("#hMsg").textContent="ไม่มีข้อมูลให้นำเข้า";return}
+    e.target.disabled=true;$("#hMsg").textContent="กำลังนำเข้า…";
+    try{for(const o of list){const doc={kpi:K.id,area:o.area,aff:o.aff,period:per,year:S.settings.year||2570,asOf,source:"hdc-file",fileName,importedBy:S.myId,importedAt:new Date().toISOString()};
+        if(o.a!=null)doc.a=o.a;if(o.b!=null)doc.b=o.b;if(o.value!=null)doc.value=o.value;const ps=Object.keys(o).filter(f=>/^p\d+$/.test(f)).sort();if(ps.length)doc.p=ps.map(f=>o[f]);
+        await S.db.doc("hdc/"+resKey(K.id,o.area,per,o.aff)).set(doc)}
+      $("#hMsg").textContent=`นำเข้าแล้ว ${list.length} รายการ`;toast("นำเข้าข้อมูล HDC แล้ว")}catch(err){e.target.disabled=false;$("#hMsg").textContent="นำเข้าไม่สำเร็จ"}}}
+function editKpi(id){const k=id?JSON.parse(JSON.stringify(S.byId[id])):{id:null,code:"",name:"",exc:"PP",plan:"",project:"",parent:"",order:"",formula:"percent",cond:">=",target:null,level:"district",districts:"all",agg:"pooled",owners:[],types:[],rule:"all",countMode:"main",watchPct:null,nearPct:null,dec:2,mult:100000,years:3};
+  const owners=new Set(k.owners||[]);const parents=S.kpis.filter(x=>!x.parent&&x.id!==k.id);const allD=!Array.isArray(k.districts)||k.districts==="all";
+  const opt=(v,cur,t)=>`<option value="${esc(v)}" ${String(v)===String(cur??"")?"selected":""}>${esc(t)}</option>`;
+  openDrawer(`<div style="display:flex;justify-content:space-between;align-items:center"><h2>${id?"แก้ไขตัวชี้วัด":"เพิ่มตัวชี้วัด"}</h2><button class="btn small" data-close>ปิด</button></div>
+  <form id="kForm" class="form" novalidate>
+    <label class="f"><span>เลขตัวชี้วัด</span><input type="text" id="kCode" value="${esc(k.code)}" required placeholder="เช่น 12.1"></label>
+    <label class="f"><span>ลำดับการแสดง</span><input type="number" step="any" id="kOrder" value="${esc(k.order??"")}"><span class="help">ใช้เรียงลำดับ เช่น 12.1</span></label>
+    <label class="f full"><span>ชื่อตัวชี้วัด</span><textarea id="kName" rows="2" required>${esc(k.name)}</textarea></label>
+    <label class="f"><span>Excellence</span><select id="kExc">${EXC.map(e=>opt(e.id,k.exc,e.name)).join("")}</select></label>
+    <label class="f"><span>เป็นตัวย่อยของ</span><select id="kParent">${opt("",k.parent,"— เป็นตัวหลัก —")}${parents.map(p=>opt(p.id,k.parent,p.code+" "+p.name.slice(0,50))).join("")}</select></label>
+    <label class="f"><span>แผนงาน</span><input type="text" id="kPlan" value="${esc(k.plan)}"></label>
+    <label class="f"><span>โครงการ</span><input type="text" id="kProject" value="${esc(k.project)}"></label>
+    <fieldset class="f full" id="parentBox"><legend>เมื่อมีตัวย่อย</legend><div class="form">
+      <label class="f"><span>การนับในสรุปผล</span><select id="kCount">${opt("main",k.countMode,"นับเฉพาะตัวหลัก")}${opt("both",k.countMode,"นับรวมตัวหลักและตัวย่อย")}${opt("subs",k.countMode,"นับเฉพาะตัวย่อย")}</select></label>
+      <label class="f"><span>เงื่อนไขการผ่านของตัวหลัก</span><select id="kRule">${opt("all",k.rule,"ตัวย่อยทุกตัวต้องผ่าน")}${opt("own",k.rule,"ใช้ผลตัวหลักเอง (ตัวย่อยไม่ผ่านก็ได้)")}${opt("min",k.rule,"ผ่านอย่างน้อย N ตัว")}</select></label>
+      <label class="f"><span>N (เมื่อเลือก “อย่างน้อย N ตัว”)</span><input type="number" min="1" id="kMin" value="${esc(k.minPass??1)}"></label>
+      <label class="f"><span>ตัวหลักมีสูตรคำนวณของตัวเอง</span><select id="kHasOwn">${opt("0",k.hasOwn?"1":"0","ไม่มี (ประเมินจากตัวย่อย)")}${opt("1",k.hasOwn?"1":"0","มี (กรอกผลตัวหลักด้วย)")}</select></label></div></fieldset>
+    <fieldset class="f full"><legend>สูตรคำนวณและเกณฑ์</legend><div class="form">
+      <label class="f"><span>ประเภทสูตร</span><select id="kFormula">${Object.entries(FORMULAS).map(([v,f])=>opt(v,k.formula,f.t)).join("")}</select></label>
+      <label class="f" id="multBox"><span>ตัวคูณ (ต่อ…)</span><select id="kMult">${[1000,10000,100000].map(m=>opt(m,k.mult||100000,"ต่อ "+fmtInt(m))).join("")}</select></label>
+      <label class="f" id="yearsBox"><span>จำนวนปีย้อนหลังที่นำมาเฉลี่ย</span><input type="number" min="1" max="10" id="kYears" value="${esc(k.years||3)}"></label>
+      <label class="f"><span>A คือ</span><input type="text" id="kA" value="${esc(k.aLabel||"")}" placeholder="เช่น จำนวนเด็กที่มีพัฒนาการสมวัย"></label>
+      <label class="f"><span>หน่วยนับของ A</span><input type="text" id="kUnit" value="${esc(k.aUnit||"")}" placeholder="เช่น คน, ราย, แห่ง, บาท" list="unitList"><datalist id="unitList"><option value="คน"><option value="ราย"><option value="แห่ง"><option value="ครั้ง"><option value="บาท"></datalist><span class="help">ใช้แสดง “อีกกี่คนจะถึงเกณฑ์”</span></label>
+      <label class="f"><span>B คือ</span><input type="text" id="kB" value="${esc(k.bLabel||"")}" placeholder="เช่น จำนวนเด็กที่ได้รับการตรวจ"></label>
+      <label class="f"><span>เงื่อนไข</span><select id="kCond">${opt(">=",k.cond,"≥ มากกว่าหรือเท่ากับ")}${opt(">",k.cond,"> มากกว่า")}${opt("<=",k.cond,"≤ ไม่เกิน (เพดาน)")}${opt("<",k.cond,"< น้อยกว่า")}</select></label>
+      <label class="f"><span>ค่าเกณฑ์</span><input type="number" step="any" id="kTarget" value="${esc(k.target??"")}" placeholder="ว่าง = รอ Template"><span class="help">สูตรเพิ่มขึ้น/ลดลง: ใส่เป็นร้อยละการเปลี่ยนแปลง เช่น ลดลงอย่างน้อย 3% → เงื่อนไข ≤ และค่า −3</span></label>
+      <label class="f full"><span>ข้อความเกณฑ์ที่แสดง (ไม่บังคับ)</span><input type="text" id="kTText" value="${esc(k.targetText||"")}" placeholder="เช่น ไม่เกิน 15 ต่อการเกิดมีชีพแสนคน"></label>
+      <label class="f"><span>เขียว*** เฝ้าระวัง: ห่างเกณฑ์ไม่เกิน (%)</span><input type="number" step="any" id="kWatch" value="${esc(k.watchPct??"")}" placeholder="ค่าเริ่มต้น 10 (เพดาน 5)"><span class="help">ใช้แสดงสถานะเท่านั้น ไม่เปลี่ยนเกณฑ์ผ่าน</span></label>
+      <label class="f"><span>เหลือง ใกล้เกณฑ์: ห่างเกณฑ์ไม่เกิน (%)</span><input type="number" step="any" id="kNear" value="${esc(k.nearPct??"")}" placeholder="ค่าเริ่มต้น 5"></label>
+      <label class="f"><span>ทศนิยม</span><input type="number" min="0" max="4" id="kDec" value="${esc(k.dec??2)}"></label></div></fieldset>
+    <fieldset class="f full"><legend>ระดับการประเมิน</legend><div class="form">
+      <label class="f"><span>ระดับ</span><select id="kLevel">${opt("district",k.level,"ระดับอำเภอ")}${opt("province",k.level,"ระดับจังหวัดเท่านั้น")}</select></label>
+      <label class="f" id="aggBox"><span>ผลภาพรวมจังหวัด</span><select id="kAgg">${opt("pooled",k.agg,"คำนวณจากผลรวม A, B ของอำเภอ")}${opt("manual",k.agg,"กรอกผลจังหวัดแยก")}</select></label>
+      <div class="f full" id="distBox"><span>อำเภอที่วัด</span><div class="checks"><label><input type="checkbox" id="dAll" ${allD?"checked":""}> ทุกอำเภอ</label>${DISTRICTS.map(d=>`<label><input type="checkbox" class="dChk" value="${d.id}" ${allD||(k.districts||[]).includes(d.id)?"checked":""}> ${esc(d.name)}</label>`).join("")}</div></div></div></fieldset>
+    <div class="f full"><span>ประเภทตัวชี้วัด</span><div class="checks">${(S.settings.types||[]).map(t=>`<span style="display:inline-flex;align-items:center;gap:6px"><label><input type="checkbox" class="tChk" value="${esc(t.id)}" ${(k.types||[]).includes(t.id)?"checked":""}> ${esc(t.name)}</label><input type="text" class="tCode" data-t="${esc(t.id)}" value="${esc((k.typeCodes||{})[t.id]||"")}" placeholder="ข้อ" aria-label="ลำดับข้อใน ${esc(t.name)}" style="width:56px;padding:2px 6px"></span>`).join("")||'<span class="meta">เพิ่มประเภทได้ที่ ตั้งค่าปี/รอบ/ประเภท</span>'}</div><span class="help">ช่อง “ข้อ” ใช้ระบุลำดับตัวชี้วัดในชุดนั้น เช่น ตรวจราชการข้อ 7 · ตัวย่อยที่ไม่ได้เลือกประเภทจะใช้ประเภทของตัวหลัก</span></div>
+    <fieldset class="f full"><legend>หน่วยบริการและแหล่งข้อมูล</legend><div class="form">
+      <label class="f"><span>การบันทึกตามสังกัด</span><select id="kAffSplit">${opt("1",k.affSplit?"1":"0","แยกบันทึก ในสังกัด / นอกสังกัด สป.สธ.")}${opt("0",k.affSplit?"1":"0","บันทึกรวม ไม่แยกสังกัด")}</select><span class="help">แยกสังกัดแล้ว แดชบอร์ดจะกรองดูเฉพาะในสังกัดหรือนอกสังกัดได้</span></label>
+      <label class="f"><span>รองรับข้อมูลจาก HDC</span><select id="kHdc">${opt("1",k.hdc&&k.hdc.on?"1":"0","รองรับ")}${opt("0",k.hdc&&k.hdc.on?"1":"0","ไม่รองรับ (บันทึกเองเท่านั้น)")}</select></label>
+      <label class="f"><span>ชื่อรายงาน/ตาราง HDC</span><input type="text" id="kHdcRep" value="${esc(k.hdc&&k.hdc.report||"")}" placeholder="เช่น ชื่อรายงานในเมนู HDC"></label>
+      <label class="f"><span>แหล่งข้อมูลเริ่มต้นในหน้าบันทึกผล</span><select id="kSrc">${opt("manual",k.defaultSrc||"manual","บันทึกเอง")}${opt("hdc",k.defaultSrc||"manual","ใช้ข้อมูล HDC")}</select><span class="help">พื้นที่ที่มีข้อมูล HDC และยังไม่เคยบันทึกเอง จะใช้ข้อมูล HDC อัตโนมัติ ผู้รับผิดชอบเปลี่ยนรายพื้นที่ได้</span></label></div></fieldset>
+    <label class="f"><span>กลุ่มงาน</span><input type="text" id="kDept" value="${esc(k.dept||"")}" list="deptList"><datalist id="deptList">${(S.settings.depts||DEPTS).map(d=>`<option value="${esc(d)}">`).join("")}</datalist><span class="help">ผู้มีสิทธิ์ของกลุ่มงานนี้บันทึกผลตัวชี้วัดนี้ได้</span></label>
+    <label class="f"><span>หน่วยงานเจ้าภาพส่วนกลาง</span><input type="text" id="kMoph" value="${esc(k.moph||"")}" placeholder="เช่น กรมอนามัย"></label>
+    <label class="f"><span>ลิงก์ KPI Template</span><input type="url" id="kTpl" value="${esc(k.template||"")}" placeholder="https://"></label>
+    <div class="f full"><span>ผู้รับผิดชอบ (บันทึกผลได้)</span><div class="people" id="ownChips"></div><input type="search" id="ownQ" placeholder="พิมพ์ชื่อหรืออีเมลเพื่อค้นหา" autocomplete="off"><div id="ownHits"></div><span class="help">ผู้รับผิดชอบตัวหลักบันทึกผลตัวย่อยได้ด้วย</span></div>
+    <label class="f full"><span>หมายเหตุ</span><textarea id="kRemark" rows="2">${esc(k.remark||"")}</textarea></label>
+    <div class="f full save-row"><span class="note" id="kMsg"></span>${id?`<button type="button" class="btn danger" id="kDel">ลบตัวชี้วัด</button>`:""}<button type="submit" class="btn primary">บันทึก</button></div>
+  </form>`,d=>{
+    const sync=()=>{const f=$("#kFormula").value;$("#multBox").hidden=f!=="rate";$("#yearsBox").hidden=f!=="change_avg";
+      const isParent=id&&kidsOf({id}).length;$("#parentBox").hidden=!isParent;
+      const lv=$("#kLevel").value;$("#distBox").hidden=lv!=="district";$("#aggBox").hidden=lv!=="district"};
+    d.querySelectorAll("select").forEach(s=>s.addEventListener("change",sync));sync();
+    $("#dAll").onchange=e=>d.querySelectorAll(".dChk").forEach(c=>c.checked=e.target.checked);
+    d.querySelectorAll(".dChk").forEach(c=>c.onchange=()=>{$("#dAll").checked=[...d.querySelectorAll(".dChk")].every(x=>x.checked)});
+    const drawOwners=()=>{$("#ownChips").innerHTML=[...owners].map(o=>personChip(o,true)).join("")||'<span class="meta">ยังไม่กำหนด</span>';
+      $("#ownChips").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{owners.delete(b.dataset.rm);drawOwners()});paintPeople($("#ownChips"))};drawOwners();
+    const q=$("#ownQ");const search=async()=>{if(!S.user)return;const hits=await S.user.search(q.value.trim());const box=$("#ownHits");
+      box.innerHTML=hits.length?`<div class="hits">${hits.filter(h=>!owners.has(h.id)).map(h=>`<button type="button" data-add="${esc(h.id)}"><img alt="" src="${esc(h.avatarUrl)}"><span></span></button>`).join("")}</div>`:(q.value.trim()?'<span class="meta">ไม่พบรายชื่อ</span>':"");
+      box.querySelectorAll("[data-add]").forEach((b,i)=>{const h=hits.filter(h=>!owners.has(h.id))[i];b.querySelector("span").textContent=h.name+(h.email?` · ${h.email}`:"");b.onclick=()=>{owners.add(b.dataset.add);q.value="";box.innerHTML="";drawOwners()}})};
+    q.addEventListener("focus",search);q.addEventListener("input",search);
+    if(id)$("#kDel").onclick=async()=>{const b=$("#kDel");if(!b.dataset.armed){b.dataset.armed="1";b.textContent="ยืนยันการลบ (ผลที่บันทึกไว้จะไม่ถูกลบ)";return}
+      if(kidsOf({id}).length){$("#kMsg").textContent="ลบตัวย่อยหรือย้ายตัวย่อยออกก่อน";return}
+      try{await S.db.doc("kpis/"+id).delete();toast("ลบตัวชี้วัดแล้ว");closeDrawer()}catch(e){$("#kMsg").textContent="ลบไม่สำเร็จ"}};
+    $("#kForm").onsubmit=async e=>{e.preventDefault();const code=$("#kCode").value.trim(),name=$("#kName").value.trim();if(!code||!name){$("#kMsg").textContent="กรอกเลขและชื่อตัวชี้วัด";return}
+      const dsel=[...d.querySelectorAll(".dChk")].filter(c=>c.checked).map(c=>c.value);
+      if($("#kLevel").value==="district"&&!dsel.length){$("#kMsg").textContent="เลือกอำเภอที่วัดอย่างน้อย 1 อำเภอ";return}
+      const parent=$("#kParent").value;
+      const o={code,name,exc:$("#kExc").value,plan:$("#kPlan").value.trim(),project:$("#kProject").value.trim(),parent:parent||null,order:num($("#kOrder").value)??num(code)??999,
+        formula:$("#kFormula").value,mult:num($("#kMult").value)||100000,years:Math.max(1,num($("#kYears").value)||3),aLabel:$("#kA").value.trim(),aUnit:$("#kUnit").value.trim(),bLabel:$("#kB").value.trim(),
+        cond:$("#kCond").value,target:num($("#kTarget").value),targetText:$("#kTText").value.trim(),watchPct:num($("#kWatch").value),nearPct:num($("#kNear").value),dec:num($("#kDec").value)??2,
+        level:$("#kLevel").value,districts:dsel.length===9?"all":dsel,agg:$("#kAgg").value,dept:$("#kDept").value.trim(),affSplit:$("#kAffSplit").value==="1",hdc:{on:$("#kHdc").value==="1",report:$("#kHdcRep").value.trim()},defaultSrc:$("#kSrc").value,template:$("#kTpl").value.trim(),remark:$("#kRemark").value.trim(),types:[...d.querySelectorAll(".tChk")].filter(c=>c.checked).map(c=>c.value),typeCodes:Object.fromEntries([...d.querySelectorAll(".tCode")].map(c=>[c.dataset.t,c.value.trim()]).filter(([t,v])=>v&&[...d.querySelectorAll(".tChk")].some(x=>x.checked&&x.value===t))),moph:$("#kMoph").value.trim(),
+        owners:[...owners],countMode:$("#kCount").value,rule:$("#kRule").value,minPass:Math.max(1,num($("#kMin").value)||1),hasOwn:$("#kHasOwn").value==="1"};
+      let docId=id;if(!docId){docId="k"+code.replace(/[^0-9A-Za-z]+/g,"_");let i=2;while(S.byId[docId])docId="k"+code.replace(/[^0-9A-Za-z]+/g,"_")+"_"+(i++)}
+      try{await S.db.doc("kpis/"+docId).set(o);toast("บันทึกตัวชี้วัดแล้ว");closeDrawer()}catch(err){$("#kMsg").textContent=err&&err.code==="invalid_argument"?"บันทึกไม่ได้: ต้องเป็นผู้ดูแลระบบ":"บันทึกไม่สำเร็จ ลองอีกครั้ง"}}})}
+
+/* ================= EXPORT ================= */
+const LIBS=window.PLK_LIBS||{h2c:"https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",pdf:"https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  xlsx:"https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js",docx:"https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"};
+const _lib={};function loadLib(n){return _lib[n]=_lib[n]||new Promise((res,rej)=>{const s=document.createElement("script");s.src=LIBS[n];s.onload=res;s.onerror=()=>{delete _lib[n];rej(new Error("load "+n))};document.head.appendChild(s)})}
+const ST_FILL={pass:"C6EFCE",watch:"C6EFCE",forced:"C6EFCE",near:"FFEB9C",fail:"FFC7CE",pending:"E7E6E6",notarget:"E7E6E6",na:"FFFFFF"};
+function exportMenu(scope){if(!S.dl)return "";return `<details class="exp"><summary class="btn small">ส่งออก</summary><div class="exp-menu" role="menu">
+  <button type="button" data-exp="png" data-scope="${scope}">ภาพ (PNG)</button><button type="button" data-exp="pdf" data-scope="${scope}">PDF</button>
+  <button type="button" data-exp="xlsx" data-scope="${scope}">ตาราง Excel (.xlsx)</button><button type="button" data-exp="docx" data-scope="${scope}">เอกสาร Word (.docx)</button></div></details>`}
+const plain=h=>{const d=document.createElement("div");d.innerHTML=String(h??"");return d.textContent.replace(/\s+/g," ").trim()};
+const stName=s=>s?(ST[s]||ST.pending).t:"";
+function stamp(){const d=new Date();return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`}
+function ctxLine(){const da=dataAsOf(S.area);const cut=curPeriod().asOf||da.max;return [`ปีงบประมาณ ${S.settings.year||2570}`,periodName(),cut?`ข้อมูล ณ วันที่ ${fmtDay(cut)}`:"",areaName(S.area),affName(S.aff),S.typeF!=="all"?`ประเภท ${typeName(S.typeF)}`:"",S.exF!=="all"?excOf(S.exF).name:"",S.demoOn?"ข้อมูลตัวอย่าง (ไม่ใช่ผลจริง)":""].filter(Boolean).join(" · ")}
+function areaRow(a){const t=tally(countedItems(a.id),a.id);return [a.name,t.total,t.pass,t.watch,t.near,t.fail,t.pending,t.rate==null?"":+t.rate.toFixed(1)]}
+function kpiRows(area,withGap){const out=[];for(const k of topItems()){if(S.exF!=="all"&&k.exc!==S.exF)continue;if(!matchType(k))continue;
+  for(const x of [k,...kidsOf(k).filter(matchType)]){const ev=evalItem(x,area);if(ev.status==="na")continue;
+    const val=ev.value!=null?fmtValue(x,ev.value):(ev.derived?ev.summary:"");const g=gapInfo(x,ev);
+    const row=[x.code,(x.parent?"   ":"")+x.name,excOf(x.exc).name.replace(" Excellence",""),typeLabels(x).join(", "),plain(critText(x)),val,{st:ev.status}];
+    if(withGap){row.push(g?g.text:"");const ao=asOfOf(x,area);row.push(ao&&ao.asOf?fmtDay(ao.asOf)+(ao.src==="hdc"?" (HDC)":""):"")}out.push(row)}}return out}
+function buildTables(scope){
+  if(scope==="dash"){const items=countedItems(S.area);
+    return {title:"รายงานผลการดำเนินงานตัวชี้วัด",file:`PLK-KPI_แดชบอร์ด_${periodName()}_${areaName(S.area)}`,tables:[
+      {name:"สรุปรายพื้นที่",head:["พื้นที่","ตัวชี้วัดที่ประเมิน","ผ่าน","ผ่าน*** เฝ้าระวัง","ใกล้เกณฑ์","ไม่ผ่าน","รอประเมิน","ร้อยละความสำเร็จ"],rows:AREAS.map(areaRow)},
+      {name:"สรุปราย Excellence",head:["Excellence","ตัวชี้วัดที่ประเมิน","ผ่าน","ผ่าน*** เฝ้าระวัง","ใกล้เกณฑ์","ไม่ผ่าน","รอประเมิน","ร้อยละความสำเร็จ"],rows:EXC.map(e=>{const t=tally(items.filter(k=>k.exc===e.id),S.area);return [e.name,t.total,t.pass,t.watch,t.near,t.fail,t.pending,t.rate==null?"":+t.rate.toFixed(1)]})},
+      {name:`รายตัวชี้วัด (${areaName(S.area)})`,head:["เลข","ตัวชี้วัด","Excellence","ประเภท","เกณฑ์","ผลงาน","สถานะ","ระยะห่างจากเกณฑ์","ข้อมูล ณ"],rows:kpiRows(S.area,true),wide:true},
+      {name:"สถานะรายพื้นที่",head:["เลข","ตัวชี้วัด",...AREAS.map(a=>a.id==="P"?"จังหวัด":a.name)],wide:true,rows:(()=>{const r=[];for(const k of topItems()){if(S.exF!=="all"&&k.exc!==S.exF||!matchType(k))continue;
+        for(const x of [k,...kidsOf(k).filter(matchType)])r.push([x.code,(x.parent?"   ":"")+x.name,...AREAS.map(a=>{const ev=evalItem(x,a.id);if(ev.status==="na")return "";const v=ev.value!=null?shortValue(x,ev.value):(ev.derived?ev.summary.replace("ผ่าน ",""):"");return {st:ev.status,v}})])}return r})()}]}}
+  if(scope==="detail"){const k=S.byId[S.detailId];if(!k)return null;
+    return {title:`${k.code} ${k.name}`,file:`PLK-KPI_ตัวชี้วัด-${k.code}_${periodName()}`,tables:[
+      {name:"ข้อมูลตัวชี้วัด",head:["รายการ","รายละเอียด"],rows:[["Excellence",excOf(k.exc).name],["แผนงาน",k.plan||""],["โครงการ",k.project||""],["สูตรคำนวณ",hasOwn(k)?`${FORMULAS[k.formula]?.t||""} · ${FORMULAS[k.formula]?.f(k)||""}`:"ประเมินจากตัวย่อย"],["A",k.aLabel||""],["B",k.bLabel||""],["เกณฑ์",plain(critText(k))],["ระดับการประเมิน",k.level==="district"?"อำเภอ":"จังหวัด"],["ประเภท",typeLabels(k).join(", ")],["กลุ่มงาน",k.dept||""],["หน่วยงานเจ้าภาพส่วนกลาง",k.moph||""]]},
+      {name:"ผลรายพื้นที่",head:["พื้นที่","ข้อมูล","ผลงาน","สถานะ","ระยะห่างจากเกณฑ์","หมายเหตุ"],wide:true,rows:AREAS.filter(a=>applicable(k,a.id)).map(a=>{const ev=evalItem(k,a.id);const r=!S.demoOn&&S.results[resKey(k.id,a.id,S.period)];const g=gapInfo(k,ev);
+        return [a.name,hasOwn(k)?inputsText(k,ev.inp):(ev.summary||""),ev.value!=null?fmtValue(k,ev.value):"",{st:ev.status},g?g.text:"",(r&&r.forcePass?"ระบุผ่าน: ":"")+(r&&r.note||"")]})}]}}
+  if(scope==="entry"){const k=S.byId[S.entrySel];if(!k)return null;const aff=S.entryAff||"moph";
+    const ih=plain(inputHeads(k).replace(/<\/th>/g,"|")).split("|").map(s=>s.trim()).filter(Boolean);
+    const rows=withCtx(aff,()=>entryAreas(k).map(a=>{const r=recOf(k,a,aff)||{};const ev=evalLeaf(k,a);const g=gapInfo(k,ev);const p=r.p||[];
+      const ins=k.formula==="qualitative"?[r.pass===true?"ผ่าน":r.pass===false?"ไม่ผ่าน":""]:k.formula==="manual"?[r.value??""]:k.formula==="count"?[r.a??""]:k.formula==="change_prev"?[r.a??"",p[0]??""]:k.formula==="change_avg"?[r.a??"",...Array.from({length:k.years||3},(_,i)=>p[i]??"")]:[r.a??"",r.b??""];
+      return [areaName(a),r.src==="hdc"?"HDC":"บันทึกเอง",...ins,r.asOf?fmtDay(r.asOf):"",ev.value!=null?fmtValue(k,ev.value):"",{st:ev.status},g?g.text:"",r.forcePass?"ใช่":"",r.note||""]}));
+    return {title:`บันทึกผล ${k.code} ${k.name} (${affName(aff)})`,file:`PLK-KPI_บันทึกผล-${k.code}_${periodName()}`,tables:[{name:"ผลรายพื้นที่",head:["พื้นที่","ที่มาข้อมูล",...ih,"ข้อมูล ณ วันที่","ผลลัพธ์","สถานะ","ระยะห่างจากเกณฑ์","ถือว่าผ่าน","หมายเหตุ"],rows,wide:true}]}}
+  if(scope==="admin"){return {title:"ทะเบียนตัวชี้วัด",file:`PLK-KPI_ทะเบียนตัวชี้วัด`,tables:[{name:"ตัวชี้วัด",wide:true,
+    head:["เลข","ตัวชี้วัด","ตัวหลัก","Excellence","ประเภท","แผนงาน","โครงการ","สูตร","A","B","หน่วย A","เงื่อนไข","ค่าเกณฑ์","ข้อความเกณฑ์","ระดับ","อำเภอที่วัด","กลุ่มงาน","หน่วยงานเจ้าภาพส่วนกลาง","จำนวนผู้รับผิดชอบ"],
+    rows:S.kpis.map(k=>[k.code,k.name,k.parent&&S.byId[k.parent]?S.byId[k.parent].code:"",excOf(k.exc).name,typeLabels(k).join(", "),k.plan||"",k.project||"",hasOwn(k)?(FORMULAS[k.formula]?.t||""):"จากตัวย่อย",k.aLabel||"",k.bLabel||"",k.aUnit||"",COND[k.cond||">="],k.target??"",k.targetText||"",k.level==="district"?"อำเภอ":"จังหวัด",k.level==="district"?(inclDistricts(k).length===9?"ทุกอำเภอ":inclDistricts(k).map(areaName).join(", ")):"",k.dept||"",k.moph||"",(k.owners||[]).length])}]}}
+  return null}
+function exportEl(scope){return scope==="dash"?$("#app"):scope==="entry"?($("#entryPane")||$("#app")):scope==="admin"?($("#adminBody")||$("#app")):document.querySelector(".drawer")}
+async function snap(scope){await loadLib("h2c");const el=exportEl(scope);if(!el)throw new Error("no el");
+  const bg=getComputedStyle(document.body).backgroundColor;const W=scope==="detail"?820:Math.max(el.clientWidth,1100);
+  const wrap=document.createElement("div");wrap.className="exp-clone exporting";wrap.style.cssText=`position:absolute;left:-20000px;top:0;width:${W}px;background:${bg};padding:20px;display:flex;flex-direction:column;gap:${scope==="detail"?14:20}px;color:var(--fg)`;
+  const head=document.createElement("div");head.className="exp-head";head.innerHTML=`<b>PLK KPI ${esc(S.settings.year||2570)}</b> · ${esc(ctxLine())} · ส่งออกเมื่อ ${esc(new Date().toLocaleString("th-TH").replace(/[๐-๙]/g,c=>"๐๑๒๓๔๕๖๗๘๙".indexOf(c)))}`;wrap.appendChild(head);
+  const src=[...el.children];for(const ch of src){const c=ch.cloneNode(true);wrap.appendChild(c)}
+  const oi=[...el.querySelectorAll("input,select,textarea")],ci=[...wrap.querySelectorAll("input,select,textarea")];oi.forEach((o,i)=>{const c=ci[i];if(!c)return;if(o.type==="checkbox")c.checked=o.checked;else c.value=o.value;if(o.tagName==="INPUT"&&o.type!=="checkbox")c.setAttribute("value",o.value)});
+  wrap.querySelectorAll(".exp,[data-close],#q").forEach(x=>x.remove());document.body.appendChild(wrap);
+  try{await new Promise(r=>requestAnimationFrame(()=>r()));return await html2canvas(wrap,{backgroundColor:bg,scale:2,useCORS:true,logging:false,width:wrap.scrollWidth,height:wrap.scrollHeight,windowWidth:wrap.scrollWidth+40})}
+  finally{wrap.remove()}}
+async function saveFile(name,data){try{await S.dl.save({filename:name,data});toast("ส่งออกแล้ว")}catch(e){if(e&&e.code==="declined")return;toast(e&&e.code==="rate_limited"?"มีหน้าต่างบันทึกไฟล์เปิดอยู่":"ส่งออกไม่สำเร็จ")}}
+async function exportPng(scope,file){const c=await snap(scope);const b=await new Promise(r=>c.toBlob(r,"image/png"));await saveFile(file+".png",b)}
+async function exportPdf(scope,file){const [c]=await Promise.all([snap(scope),loadLib("pdf")]);const {jsPDF}=window.jspdf;
+  const land=c.width>c.height*0.9;const pdf=new jsPDF({orientation:land?"landscape":"portrait",unit:"mm",format:"a4"});
+  const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight(),m=8,iw=pw-2*m,ih=ph-2*m-6;
+  const pxPerMm=c.width/iw,sliceH=Math.floor(ih*pxPerMm);const pages=Math.ceil(c.height/sliceH);
+  for(let i=0;i<pages;i++){if(i)pdf.addPage();const h=Math.min(sliceH,c.height-i*sliceH);const pc=document.createElement("canvas");pc.width=c.width;pc.height=h;
+    const g=pc.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,pc.width,h);g.drawImage(c,0,i*sliceH,c.width,h,0,0,c.width,h);
+    pdf.addImage(pc.toDataURL("image/jpeg",0.92),"JPEG",m,m,iw,h/pxPerMm);pdf.setFontSize(9);pdf.setTextColor(120);pdf.text(`${i+1} / ${pages}`,pw/2,ph-5,{align:"center"})}
+  await saveFile(file+".pdf",pdf.output("blob"))}
+async function exportXlsx(T){await loadLib("xlsx");const wb=XLSX.utils.book_new();const used=new Set();
+  const info=XLSX.utils.aoa_to_sheet([[T.title],[ctxLine()],[`ส่งออกเมื่อ ${new Date().toLocaleString("th-TH")}`],[],["สถานะ: ผ่าน / ผ่าน*** เฝ้าระวัง (ผ่านแต่ใกล้เกณฑ์) / ไม่ผ่าน (ใกล้เกณฑ์) / ไม่ผ่าน / รอประเมิน"]]);info["!cols"]=[{wch:90}];XLSX.utils.book_append_sheet(wb,info,"ข้อมูลรายงาน");
+  for(const t of T.tables){const rows=t.rows.map(r=>r.map(c=>c&&typeof c==="object"?(c.v!=null?(c.v?`${c.v} (${stName(c.st)})`:stName(c.st)):stName(c.st)):c));
+    const ws=XLSX.utils.aoa_to_sheet([t.head,...rows]);ws["!cols"]=t.head.map((h,i)=>({wch:Math.min(60,Math.max(String(h).length+2,...rows.map(r=>String(r[i]??"").length+1)))}));ws["!autofilter"]={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:rows.length,c:t.head.length-1}})};
+    let nm=t.name.replace(/[\\\/\?\*\[\]:]/g," ").slice(0,31);while(used.has(nm))nm=nm.slice(0,28)+"_"+used.size;used.add(nm);XLSX.utils.book_append_sheet(wb,ws,nm)}
+  const buf=XLSX.write(wb,{bookType:"xlsx",type:"array"});await saveFile(T.file+".xlsx",new Blob([buf]))}
+async function exportDocx(T){await loadLib("docx");const D=window.docx;const F="TH Sarabun New";
+  const run=(t,o={})=>new D.TextRun({text:String(t??""),font:F,size:o.size||28,bold:o.bold,color:o.color});
+  const para=(t,o={})=>new D.Paragraph({children:[run(t,o)],alignment:o.align,spacing:{after:o.after??80}});
+  const cell=(c,o={})=>{let txt=c,fill=o.fill;if(c&&typeof c==="object"){txt=c.v!=null&&c.v!==""?`${c.v}`:stName(c.st);fill=ST_FILL[c.st]}
+    return new D.TableCell({children:[new D.Paragraph({children:[run(txt,{size:o.size||26,bold:o.bold,color:o.color})]})],shading:fill?{fill,type:D.ShadingType.CLEAR,color:"auto"}:undefined,margins:{top:40,bottom:40,left:80,right:80}})};
+  const kids=[para(T.title,{size:40,bold:true,color:"1A5276",after:60}),para(ctxLine(),{size:28,color:"595959"}),para(`ส่งออกเมื่อ ${new Date().toLocaleString("th-TH").replace(/[๐-๙]/g,c=>"๐๑๒๓๔๕๖๗๘๙".indexOf(c))}`,{size:24,color:"7F7F7F",after:200})];
+  const anyWide=T.tables.some(t=>t.wide&&t.head.length>6);
+  for(const t of T.tables){kids.push(para(t.name,{size:32,bold:true,color:"1E8449",after:80}));const sz=t.head.length>8?22:26;
+    kids.push(new D.Table({width:{size:100,type:D.WidthType.PERCENTAGE},rows:[new D.TableRow({tableHeader:true,children:t.head.map(h=>cell(h,{fill:"2E74B5",bold:true,color:"FFFFFF",size:sz}))}),...t.rows.map(r=>new D.TableRow({cantSplit:true,children:r.map(c=>cell(c,{size:sz}))}))]}));
+    kids.push(para("",{after:200}))}
+  kids.push(para("สีสถานะ: เขียว = ผ่าน (รวมผ่าน*** เฝ้าระวัง) · เหลือง = ไม่ผ่านแต่ใกล้เกณฑ์ · แดง = ไม่ผ่าน · เทา = รอประเมิน",{size:24,color:"595959"}));
+  const doc=new D.Document({creator:"PLK KPI",title:T.title,styles:{default:{document:{run:{font:F,size:28}}}},sections:[{properties:{page:{size:anyWide?{width:16838,height:11906,orientation:D.PageOrientation.LANDSCAPE}:{width:11906,height:16838},margin:{top:1000,bottom:1000,left:1000,right:1000}}},
+    headers:{default:new D.Header({children:[new D.Paragraph({alignment:D.AlignmentType.RIGHT,children:[run(`PLK KPI ${S.settings.year||2570} · สสจ.พิษณุโลก`,{size:22,color:"7F7F7F"})]})]})},
+    footers:{default:new D.Footer({children:[new D.Paragraph({alignment:D.AlignmentType.CENTER,children:[new D.TextRun({font:F,size:22,children:["หน้า ",D.PageNumber.CURRENT," / ",D.PageNumber.TOTAL_PAGES]})]})]})},children:kids}]});
+  await saveFile(T.file+".docx",await D.Packer.toBlob(doc))}
+async function doExport(scope,fmt){const T=buildTables(scope);if(!T&&(fmt==="xlsx"||fmt==="docx")){toast("ไม่มีข้อมูลให้ส่งออก");return}
+  const file=(T?T.file:`PLK-KPI_${scope}`).replace(/[\\\/:*?"<>|]/g," ")+"_"+stamp();toast("กำลังเตรียมไฟล์…");
+  try{if(fmt==="png")await exportPng(scope,file);else if(fmt==="pdf")await exportPdf(scope,file);else if(fmt==="xlsx")await exportXlsx({...T,file});else await exportDocx({...T,file})}
+  catch(e){console.error(e);toast(String(e&&e.message||"").startsWith("load")?"โหลดเครื่องมือส่งออกไม่ได้ ตรวจสอบการเชื่อมต่ออินเทอร์เน็ต":"ส่งออกไม่สำเร็จ")}}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-exp]");if(b){const d=b.closest("details");d&&d.removeAttribute("open");doExport(b.dataset.scope,b.dataset.exp);return}
+  document.querySelectorAll("details.exp[open]").forEach(d=>{if(!d.contains(e.target))d.removeAttribute("open")})});
+
+/* ================= DATA WIRING ================= */
+let unsubRes=null,unsubHdc=null,unsubReq=null;
+function changePeriod(p){if(p===S.period)return;S.period=p;S.entryDirty=false;subscribeResults();render()}
+function subscribeResults(){if(!S.db)return;unsubRes&&unsubRes();unsubHdc&&unsubHdc();S.loadedR=false;const per=S.period;
+  unsubRes=S.db.collection("results").where("period","==",per).onSnapshot(snap=>{if(per!==S.period)return;const m={};for(const d of snap.docs)if(d.exists)m[d.id]=d.data();
+    S.results=m;S.loadedR=true;if(!S.demoTouched){const real=Object.keys(m).length+Object.keys(S.hdc).length>0;S.demoOn=!real;if(S.demoOn&&!S.demo)S.demo=buildDemo()}render()},e=>{S.dbError="เชื่อมต่อฐานข้อมูลผลงานไม่ได้ ลองเปิดหน้านี้ใหม่";render()});
+  unsubHdc=S.db.collection("hdc").where("period","==",per).onSnapshot(snap=>{if(per!==S.period)return;const m={};for(const d of snap.docs)if(d.exists)m[d.id]=d.data();S.hdc=m;
+    if(!S.demoTouched&&Object.keys(m).length&&S.demoOn){S.demoOn=false}render()},()=>{})}
+function subscribeAccess(){if(!S.db||!S.myId)return;
+  S.db.collection("members").onSnapshot(snap=>{const m={};for(const d of snap.docs)if(d.exists)m[d.id]=d.data();S.members=m;S.member=m[S.myId]||null;render()},()=>{});
+  unsubReq&&unsubReq();
+  if(S.isAdmin)unsubReq=S.db.collection("requests").onSnapshot(snap=>{const m={};for(const d of snap.docs)if(d.exists)m[d.id]={uid:d.id,...d.data()};S.requests=m;S.myReq=m[S.myId]||null;render()},()=>{});
+  else unsubReq=S.db.doc("requests/"+S.myId).onSnapshot(s=>{S.myReq=s.exists?s.data():null;render()},()=>{})}
+async function boot(){
+  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{if(S.view==="entry"&&S.entryDirty&&t.dataset.view!=="entry"){confirmLeave();return}setView(t.dataset.view);try{history.replaceState(null,"","#"+t.dataset.view)}catch(e){}});
+  const [db,user,dl]=await Promise.all([claude.use("db"),claude.use("user"),claude.use("downloads")]);S.db=db;S.user=user;S.dl=dl;
+  if(user){const [me,adm,cw]=await Promise.all([user.me(),user.canEdit(),user.can("data.write")]);S.myId=me.id;S.isAdmin=adm||me.isOwner;S.canWrite=cw;
+    $("#who").innerHTML=(me.id?`<img alt="" src="${esc(me.avatarUrl)}"><span class="pn"></span><span class="role" id="roleChip">${S.isAdmin?"ผู้ดูแลระบบ":"ผู้ใช้"}</span>`:"")+(window.PLK_AUTH?PLK_AUTH.button(me):"");const pn=$("#who .pn");if(pn)pn.textContent=me.name||"";}
+  if(!db){S.dbError="เข้าสู่ระบบเพื่อดูข้อมูลตัวชี้วัด";S.loadedK=true;render();return}
+  db.doc("settings/main").onSnapshot(s=>{S.settings=s.exists?Object.assign({},DEFAULT_SETTINGS,s.data()):DEFAULT_SETTINGS;if(!S.period){S.period=S.settings.currentPeriod||"r1";subscribeResults()}S.demo=null;if(S.demoOn)S.demo=buildDemo();render()},()=>{});
+  db.collection("kpis").onSnapshot(snap=>{indexKpis(snap.docs.filter(d=>d.exists).map(d=>({id:d.id,...d.data()})));S.loadedK=true;S.demo=null;if(S.demoOn)S.demo=buildDemo();
+    if(S.view==="admin"&&$("#drawerHost").innerHTML)return;render()},e=>{S.dbError="เชื่อมต่อฐานข้อมูลตัวชี้วัดไม่ได้ ลองเปิดหน้านี้ใหม่";render()});
+  subscribeAccess();
+  const h=(location.hash||"").replace("#","");if(["dashboard","entry","admin"].includes(h))S.view=h;setView(S.view)}
+render();
+if(window.claude&&claude.use)boot();else{S.dbError="เชื่อมต่อระบบไม่ได้ ลองเปิดหน้านี้ใหม่";S.loadedK=true;render()}
+</script>
+
+
+</body>
+</html>

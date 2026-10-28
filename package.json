@@ -1,0 +1,11 @@
+{
+  "name": "plk-kpi",
+  "version": "1.0.0",
+  "description": "ระบบติดตามตัวชี้วัดกระทรวงสาธารณสุข สสจ.พิษณุโลก (แดชบอร์ด บันทึกผล ผู้ดูแลระบบ)",
+  "private": true,
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server/server.js",
+    "build:demo": "node scripts/build-demo.js"
+  }
+}
